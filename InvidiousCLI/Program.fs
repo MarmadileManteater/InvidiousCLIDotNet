@@ -201,6 +201,9 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                 with
                     ex -> printAsColorNewLine(ex.Message, ConsoleColor.Red, Console.BackgroundColor) ; printAsColorNewLine("Media player added unsuccessfully.", ConsoleColor.Red, Console.BackgroundColor)
 
+        else
+            let command = args[0]
+            printAsColorNewLine("\"" + command + "\" is not recognized as a command.", ConsoleColor.Red, Console.BackgroundColor)
 let firstTimeSetup(userData : UserData) =
     printAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
     // If the user is using Windows, we can always ask them if they want to use this.
