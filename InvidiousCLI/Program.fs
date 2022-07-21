@@ -202,58 +202,73 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                     ex -> printAsColorNewLine(ex.Message, ConsoleColor.Red, Console.BackgroundColor) ; printAsColorNewLine("Media player added unsuccessfully.", ConsoleColor.Red, Console.BackgroundColor)
 
 let firstTimeSetup(userData : UserData) =
-    printAsColorNewLine("First time setup:", ConsoleColor.Blue, ConsoleColor.Black)
-    printAsColor("Setup a media player? [", ConsoleColor.DarkYellow, Console.BackgroundColor)
-    printAsColor("Y", ConsoleColor.Green, Console.BackgroundColor)
-    printAsColor("/", ConsoleColor.DarkYellow, Console.BackgroundColor)
-    printAsColor("N", ConsoleColor.Red, Console.BackgroundColor)
-    printAsColorNewLine("]", ConsoleColor.DarkYellow, Console.BackgroundColor)
-    // Loop for validating that the user is either agreeing or declining
-    let mutable setupMediaPlayer = System.Console.ReadLine()
-    while setupMediaPlayer <> "Y" && setupMediaPlayer <> "N" do
+    printAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
+    // If the user is using Windows, we can always ask them if they want to use this.
+    let checkForExistingPlayer (playerExecutable : string, workingDirectory : string) =
+        if File.Exists(playerExecutable) then
+            let playerName = playerExecutable.Split(workingDirectory)[1]
+            let mediaPlayer = new JObject()
+            mediaPlayer.Add("name", playerName)
+            mediaPlayer.Add("executable_path", playerExecutable)
+            mediaPlayer.Add("working_directory", workingDirectory)
+            userData.AddMediaPlayer(mediaPlayer)
+            saveUserData(userData)
+            printAsColorNewLine(playerName + " automatically added!", ConsoleColor.Green, Console.BackgroundColor)
+    checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\")
+    checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/")
+    checkForExistingPlayer("/usr/bin/vlc", "/usr/bin")
+    let mutable command = new List<string>()
+    command.Add("list-media-players")
+    processCommand(command, null, userData) |> ignore
+    let mutable input = ""
+    if userData.MediaPlayers.Count > 1 then
+        printAsColor("Enter the index of the media player you would like to use:", ConsoleColor.Yellow, Console.BackgroundColor)
+        input <- System.Console.ReadLine()
+    if input = "" then
         printAsColor("Setup a media player? [", ConsoleColor.DarkYellow, Console.BackgroundColor)
         printAsColor("Y", ConsoleColor.Green, Console.BackgroundColor)
         printAsColor("/", ConsoleColor.DarkYellow, Console.BackgroundColor)
         printAsColor("N", ConsoleColor.Red, Console.BackgroundColor)
         printAsColorNewLine("]", ConsoleColor.DarkYellow, Console.BackgroundColor)
-        setupMediaPlayer <- System.Console.ReadLine()
-    done
-    if setupMediaPlayer = "Y" then
-        // If the user wants to setup a media player,
-        printAsColor("Media Player executable path:", ConsoleColor.DarkYellow, ConsoleColor.Black)
-        let executablePath = System.Console.ReadLine()
-        let executableUri = new Uri(executablePath)
-        let fileName = executableUri.Segments.LastOrDefault()
-        let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
-        let path = executablePath.Substring(0, executablePath.Length - fileName.Length)
-        let mediaPlayer = new JObject()
-        mediaPlayer.Add("name", appName)
-        mediaPlayer.Add("executable_path", executablePath)
-        mediaPlayer.Add("working_directory", path)
-        userData.AddMediaPlayer(mediaPlayer)
-        saveUserData(userData)
-    // If the user is using Windows, we can always ask them if they want to use this.
-    if File.Exists("C:\Program Files (x86)\Windows Media Player\wmplayer.exe") then
-        // If the user opted-out of setting up a media player manually, we can ask them if they want to automatically setup Windows Media Player as their media player.
-        if setupMediaPlayer = "N" then
-            setupMediaPlayer <- ""
-            while setupMediaPlayer <> "Y" && setupMediaPlayer <> "N" do
-                printAsColor("Windows Media Player detected. Would you like to add it as a media player? [", ConsoleColor.DarkYellow, Console.BackgroundColor)
-                printAsColor("Y", ConsoleColor.Green, Console.BackgroundColor)
-                printAsColor("/", ConsoleColor.DarkYellow, Console.BackgroundColor)
-                printAsColor("N", ConsoleColor.Red, Console.BackgroundColor)
-                printAsColorNewLine("]", ConsoleColor.DarkYellow, Console.BackgroundColor)
-                setupMediaPlayer <- System.Console.ReadLine()
-            done
-            if setupMediaPlayer = "Y" then
+        // Loop for validating that the user is either agreeing or declining
+        let mutable setupMediaPlayer = System.Console.ReadLine()
+        while setupMediaPlayer <> "Y" && setupMediaPlayer <> "N" do
+            printAsColor("Setup a media player? [", ConsoleColor.DarkYellow, Console.BackgroundColor)
+            printAsColor("Y", ConsoleColor.Green, Console.BackgroundColor)
+            printAsColor("/", ConsoleColor.DarkYellow, Console.BackgroundColor)
+            printAsColor("N", ConsoleColor.Red, Console.BackgroundColor)
+            printAsColorNewLine("]", ConsoleColor.DarkYellow, Console.BackgroundColor)
+            setupMediaPlayer <- System.Console.ReadLine()
+        done
+        if setupMediaPlayer = "Y" then
+            // If the user wants to setup a media player,
+            printAsColor("Media Player executable path:", ConsoleColor.DarkYellow, ConsoleColor.Black)
+            let executablePath = System.Console.ReadLine()
+            try
+                let executableUri = new Uri(executablePath)
+                let fileName = executableUri.Segments.LastOrDefault()
+                let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
+                let path = executablePath.Substring(0, executablePath.Length - fileName.Length)
                 let mediaPlayer = new JObject()
-                mediaPlayer.Add("name", "wmplayer")
-                mediaPlayer.Add("executable_path", "C:\Program Files (x86)\Windows Media Player\wmplayer.exe")
-                mediaPlayer.Add("working_directory", "C:\Program Files (x86)\Windows Media Player")
+                mediaPlayer.Add("name", appName)
+                mediaPlayer.Add("executable_path", executablePath)
+                mediaPlayer.Add("working_directory", path)
                 userData.AddMediaPlayer(mediaPlayer)
                 saveUserData(userData)
-                printAsColorNewLine("Windows Media Player added!", ConsoleColor.Green, Console.BackgroundColor)
-
+            with
+                | ex ->
+                    printAsColorNewLine("There was some issue adding the given media player path.", ConsoleColor.Red, Console.BackgroundColor)
+                    printAsColorNewLine(ex.Message, ConsoleColor.Red, Console.BackgroundColor)
+    else
+        let result = try input |> int |> Nullable<int>
+                        with:? FormatException ->
+                        new Nullable<int>()
+        if result.HasValue then
+            if userData.MediaPlayers.Count > result.Value then
+                command <- new List<string>()
+                command.Add("set-primary-media-player")
+                command.Add(input)
+                processCommand(command, null, userData)
 [<EntryPoint>]
 let main(args) =
     let client = new InvidiousAPIClient()
