@@ -17,8 +17,8 @@ open Newtonsoft.Json.Linq
 // This is the central entry point for all of the command processing.
 // It is recursive to handle commands that need to be parsed before processing.
 // If a user enters a link, it parses out the id for the video and runs
-// processCommand("watch", "{videoId}") where {videoId} is id pulled out of the link.
-let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, userData : UserData) =
+// processCommand(["watch", "{videoId}"], client, userData, false) where {videoId} is id pulled out of the link.
+let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, userData : UserData, takeAdditionalInput : bool) =
     // Saving to command history
     userData.AddToCommandHistory(String.Join(" ", args)) |> ignore
     saveUserData(userData)
@@ -55,6 +55,49 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                         let playlist = result.ToPlaylist()
                         printPlaylistInfo(playlist)
                 done
+                let mutable page = 0
+                if takeAdditionalInput then
+                    while true do
+                        let input = System.Console.ReadLine()
+                        let innerArguments = input.Split(" ")
+                        if innerArguments.Length > 0 then
+                            let command = innerArguments[0]
+
+                            if command = "next" then
+                                page <- page + 1
+                                let results = client.SearchSync(query, page)
+                                for result in results do
+                                    if result.IsVideo() then
+                                        let video = result.ToVideo()
+                                        printShortVideoInfo(video)
+                                    elif result.IsChannel() then
+                                        let channel = result.ToChannel()
+                                        printChannelInfo(channel)
+                                    elif result.IsPlaylist() then
+                                        let playlist = result.ToPlaylist()
+                                        printPlaylistInfo(playlist)
+                                done
+                            elif command = "previous" then
+                                page <- page - 1
+                                if page > -1 then
+                                    let results = client.SearchSync(query, page)
+                                    for result in results do
+                                        if result.IsVideo() then
+                                            let video = result.ToVideo()
+                                            printShortVideoInfo(video)
+                                        elif result.IsChannel() then
+                                            let channel = result.ToChannel()
+                                            printChannelInfo(channel)
+                                        elif result.IsPlaylist() then
+                                            let playlist = result.ToPlaylist()
+                                            printPlaylistInfo(playlist)
+                                    done
+                                else
+                                    page <- 0
+                                    printAsColorNewLine("You are already on the first page. There is no previous page.", ConsoleColor.DarkYellow, Console.BackgroundColor)
+                            else
+                                processCommand(input.Split(" "), client, userData, takeAdditionalInput) |> ignore
+                    done
         elif args[0] = "watch" then
             if args.Count < 2 then
                 // If not enough arguments are given,
@@ -123,7 +166,7 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                 let arguments = new List<string>()
                 arguments.Add("watch")
                 arguments.Add(uri.Segments.Last())
-                processCommand(arguments, client, userData)
+                processCommand(arguments, client, userData, takeAdditionalInput)
             else
                 // query
                 // some part of the query is our video id
@@ -134,7 +177,7 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                     let arguments = new List<string>()
                     arguments.Add("watch")
                     arguments.Add(endOfQuery)
-                    processCommand(arguments, client, userData)
+                    processCommand(arguments, client, userData, takeAdditionalInput)
         elif args[0] = "add-media-player" then
             // If the user wants to setup a media player,
             if args.Count < 2 then
@@ -157,7 +200,7 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                     let executableUri = new Uri(executablePath)
                     let fileName = executableUri.Segments.LastOrDefault()
                     let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
-                    let path = executablePath.Substring(0, executablePath.Length - fileName.Length)
+                    let path = executablePath.Substring(0, executablePath.Length - fileName.Length - 1)
                     let mediaPlayer = new JObject()
                     mediaPlayer.Add("name", appName)
                     mediaPlayer.Add("executable_path", executablePath)
@@ -206,7 +249,6 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
             printAsColorNewLine("\"" + command + "\" is not recognized as a command.", ConsoleColor.Red, Console.BackgroundColor)
 let firstTimeSetup(userData : UserData) =
     printAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
-    // If the user is using Windows, we can always ask them if they want to use this.
     let checkForExistingPlayer (playerExecutable : string, workingDirectory : string) =
         if File.Exists(playerExecutable) then
             let playerName = playerExecutable.Split(workingDirectory)[1]
@@ -217,12 +259,20 @@ let firstTimeSetup(userData : UserData) =
             userData.AddMediaPlayer(mediaPlayer)
             saveUserData(userData)
             printAsColorNewLine(playerName + " automatically added!", ConsoleColor.Green, Console.BackgroundColor)
+    // #region Windows
     checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\")
     checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/")
+    // #endregion
+    // #region WSL
+    checkForExistingPlayer("/mnt/c/Program Files (x86)/Windows Media Player/wmplayer.exe", "/mnt/c/Program Files (x86)/Windows Media Player/")
+    checkForExistingPlayer("/mnt/c/Program Files/VideoLAN/VLC/vlc.exe", "/mnt/c/Program Files/VideoLAN/VLC/")
+    // #endregion
+    // #region Linux
     checkForExistingPlayer("/usr/bin/vlc", "/usr/bin")
+    // #endregion
     let mutable command = new List<string>()
     command.Add("list-media-players")
-    processCommand(command, null, userData) |> ignore
+    processCommand(command, null, userData, true) |> ignore
     let mutable input = ""
     if userData.MediaPlayers.Count > 1 then
         printAsColor("Enter the index of the media player you would like to use:", ConsoleColor.Yellow, Console.BackgroundColor)
@@ -271,7 +321,7 @@ let firstTimeSetup(userData : UserData) =
                 command <- new List<string>()
                 command.Add("set-primary-media-player")
                 command.Add(input)
-                processCommand(command, null, userData)
+                processCommand(command, null, userData, true)
 [<EntryPoint>]
 let main(args) =
     let client = new InvidiousAPIClient()
@@ -281,9 +331,9 @@ let main(args) =
         let userData = getExistingUserData(firstTimeSetup)
         while true do
             let input = System.Console.ReadLine()
-            processCommand(input.Split(" "), client, userData) |> ignore
+            processCommand(input.Split(" "), client, userData, true) |> ignore
         done
         0
     else
-        processCommand(args, client, new UserData()) |> ignore
+        processCommand(args, client, new UserData(), false) |> ignore
         0
