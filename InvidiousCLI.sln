@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "InvidiousCLI", "InvidiousCLI\InvidiousCLI.fsproj", "{A240B83C-66A9-4F02-8D64-421A512C34E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A240B83C-66A9-4F02-8D64-421A512C34E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A240B83C-66A9-4F02-8D64-421A512C34E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A240B83C-66A9-4F02-8D64-421A512C34E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A240B83C-66A9-4F02-8D64-421A512C34E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7201E252-269D-4D5A-A00A-8B3BE5797599}
+	EndGlobalSection
+EndGlobal
