@@ -2,9 +2,10 @@
 
 open System
 open System.IO
-open MarmadileManteater.InvidiousCLI.Objects
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
+open MarmadileManteater.InvidiousCLI.Objects
+open MarmadileManteater.InvidiousCLI.Paths
 
 let saveUserData(userData : UserData) =
     let localDataDirectory = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MarmadileManteater")
@@ -14,20 +15,17 @@ let saveUserData(userData : UserData) =
 
 let getExistingUserData(firstTimeSetupCallback : Action<UserData>) =
     let mutable isFirstTimeSetup = false
-    let localDataDirectory = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MarmadileManteater")
-    let programLocalData = Path.Join(localDataDirectory, "InvidiousCLI-F#")
-    let userDataPath = Path.Join(programLocalData, "user-data.json")
-    if Directory.Exists(localDataDirectory) <> true then
-        Directory.CreateDirectory(localDataDirectory) |> ignore
-    if Directory.Exists(programLocalData) <> true then
-        Directory.CreateDirectory(programLocalData) |> ignore
-    if File.Exists(userDataPath) <> true then
+    if Directory.Exists(LocalDataDirectory) <> true then
+        Directory.CreateDirectory(LocalDataDirectory) |> ignore
+    if Directory.Exists(ProgramLocalData) <> true then
+        Directory.CreateDirectory(ProgramLocalData) |> ignore
+    if File.Exists(UserDataPath) <> true then
         // first time setup
-        let jsonFile = File.Create(userDataPath)
+        let jsonFile = File.Create(UserDataPath)
         jsonFile.Close()
-        File.WriteAllText(userDataPath, "{}")
+        File.WriteAllText(UserDataPath, "{}")
         isFirstTimeSetup <- true
-    let userDataJObject = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(userDataPath))
+    let userDataJObject = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(UserDataPath))
     let userData = new UserData(userDataJObject)
     if isFirstTimeSetup then
         firstTimeSetupCallback.Invoke(userData)

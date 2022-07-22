@@ -1,18 +1,19 @@
 ﻿module MarmadileManteater.InvidiousCLI.Program
 
-open MarmadileManteater.InvidiousClient.Objects
 open System.Collections.Generic
 open System
 open System.Linq
+open System.Diagnostics
+open System.IO
+open Newtonsoft.Json.Linq
+open MarmadileManteater.InvidiousClient.Objects
 open MarmadileManteater.InvidiousClient.Interfaces
 open MarmadileManteater.InvidiousClient.Extensions
 open MarmadileManteater.InvidiousClient.Objects.Data
-open System.Diagnostics
-open System.IO
 open MarmadileManteater.InvidiousCLI.Objects
 open MarmadileManteater.InvidiousCLI.Prints
 open MarmadileManteater.InvidiousCLI.FileOperations
-open Newtonsoft.Json.Linq
+open MarmadileManteater.InvidiousCLI.Paths
 
 // This is the central entry point for all of the command processing.
 // It is recursive to handle commands that need to be parsed before processing.
@@ -243,7 +244,10 @@ let rec processCommand (args : IList<string>, client : IInvidiousAPIClient, user
                     printAsColorNewLine("Media player \"" + appName + "\" successfully set as primary!", ConsoleColor.Green, Console.BackgroundColor)
                 with
                     ex -> printAsColorNewLine(ex.Message, ConsoleColor.Red, Console.BackgroundColor) ; printAsColorNewLine("Media player added unsuccessfully.", ConsoleColor.Red, Console.BackgroundColor)
-
+        elif args[0] = "show-history" then
+            for video in userData.VideoHistory do
+                printShortVideoInfo(video)
+            done
         else
             let command = args[0]
             printAsColorNewLine("\"" + command + "\" is not recognized as a command.", ConsoleColor.Red, Console.BackgroundColor)
@@ -327,6 +331,7 @@ let main(args) =
     let client = new InvidiousAPIClient()
     if args.Length = 0 then
         // Running with no arguments
+        // interactive prompt
         printGreeting()
         let userData = getExistingUserData(firstTimeSetup)
         while true do
@@ -335,5 +340,9 @@ let main(args) =
         done
         0
     else
-        processCommand(args, client, new UserData(), false) |> ignore
+        // non interactive prompt
+        let mutable userData = new UserData()
+        if File.Exists(UserDataPath) then// Don't run first time setup if the user data doesn't exist because it will trigger an interactive prompt
+            userData <- getExistingUserData(firstTimeSetup)
+        processCommand(args, client, userData, false) |> ignore
         0

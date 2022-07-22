@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Paths.fs" />
     <Compile Include="Prints.fs" />
     <Compile Include="Objects.fs" />
     <Compile Include="FileOperations.fs" />

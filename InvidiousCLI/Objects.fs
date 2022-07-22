@@ -2,10 +2,10 @@
 
 open System.Collections.Generic
 open Newtonsoft.Json.Linq
-open MarmadileManteater.InvidiousClient.Objects.Data
-open MarmadileManteater.InvidiousClient.Extensions
 open System
 open Newtonsoft.Json
+open MarmadileManteater.InvidiousClient.Objects.Data
+open MarmadileManteater.InvidiousClient.Extensions
 
 type UserData(data) =
     let _data : JObject = data
