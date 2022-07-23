@@ -342,7 +342,9 @@ let main(args) =
     else
         // non interactive prompt
         let mutable userData = new UserData()
-        if File.Exists(UserDataPath) then// Don't run first time setup if the user data doesn't exist because it will trigger an interactive prompt
+        // If the user data doesn't exist,
+        // Don't run first time setup because it will trigger an interactive prompt
+        if File.Exists(UserDataPath) then
             userData <- getExistingUserData(firstTimeSetup)
         processCommand(args, client, userData, false) |> ignore
         0
