@@ -1,4 +1,4 @@
-﻿module MarmadileManteater.InvidiousCLI.Objects
+﻿namespace MarmadileManteater.InvidiousCLI.Objects
 
 open System.Collections.Generic
 open Newtonsoft.Json.Linq
@@ -33,7 +33,7 @@ type UserData(data) =
 
     member self.AddToVideoHistory (video : JObject) =
         let history = if _data.ContainsKey("video_history") then _data["video_history"].Value<JArray>() else new JArray()
-        history.Add(video)
+        history.Insert(0, video)
         // re-add the history object in case it does not exist and we just initialized it above
         _data["video_history"] <- history
 
