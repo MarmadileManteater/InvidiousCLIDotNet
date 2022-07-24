@@ -8,20 +8,26 @@ open System
 
 type ICommand =
     interface
-    // the name of the command
+    /// <summary>The name of the command</summary>
     abstract Name : string
+    /// <summary>
+    /// The match type for the command (ex: Equals, StartsWith, EndsWith)
+    /// </summary>
     abstract Match : MatchType
-    // a single line description of the command
+    /// <summary>
+    /// A single line description of the command
+    /// </summary>
     abstract Description : string
-    // a multi line doc for getting a little more info about the parameters used in the command
+    /// <summary>
+    /// A multi line doc for getting a little more info about the parameters used in the command
+    /// </summary>
     abstract Documentation : IEnumerable<string>
-    // the number of arguments to absolutely require
+    /// <summary>
+    /// The number of arguments to absolutely require
+    /// </summary>
     abstract RequiredArgCount : int
-    // execute the command
-    // @param {IList<string>} arguments
-    // @param {UserData} userData - the user data object used to interact with the data stored in user-data within plugins
-    // @param {IInvidiousAPIClient} client - the client used to talk to invidious
-    // @param {Action} processCommand - is a method for calling other commands recursively
-    // @returns an int which will be interpreted as an error if it is -1 and a success if it is 0
+    /// <summary>
+    /// Execute the command
+    /// </summary>
     abstract Execute : IList<string> * UserData * IInvidiousAPIClient * bool * Action<IList<string>, IInvidiousAPIClient, UserData, bool> -> int
 end
