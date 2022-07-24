@@ -10,6 +10,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>MarmadileManteater</Authors>
     <Copyright>MIT License Copyright (c) 2022 MarmadileManteater</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,6 +30,17 @@
     <Compile Include="Functions\FileOperations.fs" />
     <Compile Include="Plugins.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\icons\invidious.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
