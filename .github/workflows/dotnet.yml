@@ -1,0 +1,67 @@
+name: Build
+
+on:
+  push:
+    branches: [ "development" ]
+jobs:
+  build:
+    strategy:
+      matrix:
+        node-version: [16.x]
+        runtime: [ linux-x64, linux-arm64, win-x64, osx-x64 ]
+        include:
+        - runtime: linux-x64
+          os: ubuntu-18.04
+
+        - runtime: linux-arm64
+          os: ubuntu-latest
+
+        - runtime: osx-x64
+          os: macOS-latest
+
+        - runtime: win-x64
+          os: windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Modify nuget package number
+      uses: mingjun97/file-regex-replace@v1
+      with:
+        regex: '<Version>([0-9\.]*)</Version>'
+        replacement: '<Version>0.$1.${{ github.run_number }}</Version>'
+        flags: "g"
+        include: 'InvidiousCLI'
+        exclude: '.^'
+        encoding: 'utf8'
+        path: 'InvidiousCLI'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+    
+    - name: Copy core commands build output to Invidious CLI out directory
+      run: |
+        cp CoreCommands/bin/Debug/net6.0/* InvidiousCLI/bin/Debug/net6.0
+
+    - name: Upload the output directory
+      uses: actions/upload-artifact@v2
+      with:
+        name: InvidiousCLI-development-${{ github.run_number }}-${{ matrix.runtime }}
+        path: InvidiousCLI/bin/Debug/net6.0
+        
+    - name: Upload the Nuget artifact
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.os, 'windows-latest) && startsWith(matrix.runtime, 'win-x64')
+      with:
+        name: InvidiousCLI-development-${{ github.run_number }}-NUGET
+        path: InvidiousCLI/bin/Debug/*.nupkg
+        
