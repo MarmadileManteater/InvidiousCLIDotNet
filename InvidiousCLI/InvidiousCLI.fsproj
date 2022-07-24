@@ -3,8 +3,22 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <Version>0.2.0</Version>
+    <Version>0.2</Version>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <SignAssembly>False</SignAssembly>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>MarmadileManteater</Authors>
+    <Copyright>MIT License Copyright (c) 2022 MarmadileManteater</Copyright>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="InvidiousAPIClient\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Enums\MatchType.fs" />
