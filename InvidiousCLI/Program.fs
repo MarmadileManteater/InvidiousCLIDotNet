@@ -80,7 +80,7 @@ module Program =
             checkForExistingPlayer("/mnt/c/Program Files/VideoLAN/VLC/vlc.exe", "/mnt/c/Program Files/VideoLAN/VLC/")
             // #endregion
             // #region Linux
-            checkForExistingPlayer("/usr/bin/vlc", "/usr/bin")
+            checkForExistingPlayer("/usr/bin/vlc", "/usr/bin/")
             // #endregion
             let mutable command = new List<string>()
             command.Add("media-player")
