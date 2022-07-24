@@ -60,7 +60,7 @@ jobs:
         
     - name: Upload the Nuget artifact
       uses: actions/upload-artifact@v2
-      if: startsWith(matrix.os, 'windows-latest) && startsWith(matrix.runtime, 'win-x64')
+      if: startsWith(matrix.os, 'windows-latest') && startsWith(matrix.runtime, 'win-x64')
       with:
         name: InvidiousCLI-development-${{ github.run_number }}-NUGET
         path: InvidiousCLI/bin/Debug/*.nupkg
