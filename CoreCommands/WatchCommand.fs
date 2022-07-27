@@ -23,7 +23,7 @@ type WatchCommand() =
             results.Add("watch {videoId} {qualityOrItag}")
             results
         member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int =  
-            let isVideoHistoryEnabled = userData.Settings.IsVideoHistoryEnabled()
+            let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let videoId = args[0]
             // the second argument is the quality or
             let quality = if args.Count > 1 then args[1] else userData.Settings.DefaultFormat()

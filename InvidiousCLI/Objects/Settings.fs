@@ -46,7 +46,7 @@ type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken
             setSetting.Invoke("command_history", if value.Value then "enable" else "disable")
             value.Value
 
-    member self.IsVideoHistoryEnabled (?value : bool) : bool =
+    member self.IsWatchHistoryEnabled (?value : bool) : bool =
         if value = None then
             if hasSetting.Invoke("video_history") then
                 getSetting.Invoke("video_history").Value<string>() = "enable"
