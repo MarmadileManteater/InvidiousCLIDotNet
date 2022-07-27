@@ -17,7 +17,7 @@ type LinkCommand() =
             results.Add("@param link {string} the full link")
             results.Add("{link}")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, interactive : bool, processCommand : Action<IList<string>, IInvidiousAPIClient, UserData, bool>): int = 
+        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             let uri = new Uri(args[0])
             if uri.AbsolutePath = uri.PathAndQuery then
                 // no query
@@ -26,7 +26,7 @@ type LinkCommand() =
                 let arguments = new List<string>()
                 arguments.Add("watch")
                 arguments.Add(uri.Segments.Last())
-                processCommand.Invoke(arguments, client, userData, interactive)
+                processCommand.Invoke(arguments, client, userData, isInteractive)
                 0
             else
                 // query
@@ -38,7 +38,7 @@ type LinkCommand() =
                     let arguments = new List<string>()
                     arguments.Add("watch")
                     arguments.Add(endOfQuery)
-                    processCommand.Invoke(arguments, client, userData, interactive)
+                    processCommand.Invoke(arguments, client, userData, isInteractive)
                     0
                 else
                     -1

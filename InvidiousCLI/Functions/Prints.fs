@@ -88,6 +88,10 @@ module Prints =
         for line in command.Documentation do
             if line.StartsWith("@") then
                 PrintAsColorNewLine(prefix + line, ConsoleColor.DarkYellow, Console.BackgroundColor)
+            elif line.StartsWith("#") then
+                PrintAsColorNewLine(prefix + line.Substring(1, line.Length - 1), ConsoleColor.Yellow, Console.BackgroundColor)
+            elif line.StartsWith("-") then
+                PrintAsColorNewLine(prefix + line, ConsoleColor.Gray, Console.BackgroundColor)
             else
                 PrintAsColorNewLine(prefix + line, ConsoleColor.Cyan, Console.BackgroundColor)
         Console.WriteLine()

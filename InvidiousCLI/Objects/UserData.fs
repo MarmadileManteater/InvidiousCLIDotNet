@@ -37,6 +37,9 @@ type UserData(data) =
         // re-add the history object in case it does not exist and we just initialized it above
         _data["video_history"] <- history
 
+    member self.ClearVideoHistory () =
+        _data["video_history"] <- new JArray()
+
     member self.GetData () =
         _data
 
@@ -72,5 +75,41 @@ type UserData(data) =
             self.MediaPlayers[primaryMediaPlayer]
         else
             new JObject()
+
+    member self.GetSettingsAsDictionary () : IDictionary<string, JToken> =
+        let results = new Dictionary<string, JToken>()
+        let settings = if _data.ContainsKey("settings") then _data["settings"].Value<JObject>() else new JObject()
+        for setting in settings do
+            results[setting.Key] <- setting.Value
+        results
+
+    member self.HasSetting (key : string) : bool =
+        let settings = if _data.ContainsKey("settings") then _data["settings"].Value<JObject>() else new JObject()
+        _data["settings"] <- settings
+        settings[key] <> null
+
+    member self.GetSetting (key : string) : JToken =
+        let settings = if _data.ContainsKey("settings") then _data["settings"].Value<JObject>() else new JObject()
+        _data["settings"] <- settings
+        settings[key]
+
+    member self.SetSetting (key : string, value : JToken) =
+        let settings = if _data.ContainsKey("settings") then _data["settings"].Value<JObject>() else new JObject()
+        settings[key] <- value
+        _data["settings"] <- settings
+
+    member self.RemoveSetting (key : string) =
+        let settings = if _data.ContainsKey("settings") then _data["settings"].Value<JObject>() else new JObject()
+        let newSettings = new JObject()
+        for setting in settings do
+            if setting.Key <> key then
+                newSettings[setting.Key] <- setting.Value
+        _data["settings"] <- newSettings
+
+    member self.Settings : Settings =
+        let hasSetting = fun key -> self.HasSetting(key)
+        let getSetting = fun key -> self.GetSetting(key)
+        let setSetting = fun key value -> self.SetSetting(key, value)
+        new Settings(hasSetting, getSetting, setSetting)
 
     new() = UserData(new JObject())

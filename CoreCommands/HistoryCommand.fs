@@ -7,6 +7,7 @@ open MarmadileManteater.InvidiousCLI.Objects
 open MarmadileManteater.InvidiousClient.Interfaces
 open System
 open MarmadileManteater.InvidiousCLI.Functions
+open System.Linq
 
 type HistoryCommand() =
     interface ICommand with
@@ -15,8 +16,11 @@ type HistoryCommand() =
         member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("history list")
+            results.Add("history enable")
+            results.Add("history disable")
+            results.Add("history clear")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive : bool, processCommand : Action<IList<string>, IInvidiousAPIClient, UserData, bool>): int = 
+        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "list" then
                 let mutable page = 0
                 let pageLength = 10
@@ -56,7 +60,16 @@ type HistoryCommand() =
                                 processCommand.Invoke(input.Split(" "), client, userData, isInteractive)
                                 // return control to the main program
                                 hasControl <- false
+            elif args[0] = "enable" then
+                processCommand.Invoke("settings set video_history enable".Split(" ").ToList<string>(), client, userData, isInteractive)
+                processCommand.Invoke("settings get video_history".Split(" ").ToList<string>(), client, userData, isInteractive)
+            elif args[0] = "disable" then
+                processCommand.Invoke("settings set video_history disable".Split(" ").ToList<string>(), client, userData, isInteractive)
+                processCommand.Invoke("settings get video_history".Split(" ").ToList<string>(), client, userData, isInteractive)
             elif args[0] = "clear" then
+                userData.ClearVideoHistory()
+                FileOperations.SaveUserData(userData)
+                Prints.PrintAsColorNewLine("Cleared all history!", ConsoleColor.Green, Console.BackgroundColor)
                 Console.WriteLine()
             0
         member self.Match: MarmadileManteater.InvidiousCLI.Enums.MatchType = 

@@ -18,9 +18,9 @@ module Program =
     // processCommand(["watch", "{videoId}"], client, userData, false) where {videoId} is id pulled out of the link.
     let rec ProcessCommand (args : IList<string>, client : IInvidiousAPIClient, userData : UserData, takeAdditionalInput : bool, commands : IList<ICommand>) =
         // Saving to command history
-        userData.AddToCommandHistory(String.Join(" ", args)) |> ignore
-        FileOperations.SaveUserData(userData)
-        //
+        if userData.Settings.IsCommandHistoryEnabled() then
+            userData.AddToCommandHistory(String.Join(" ", args)) |> ignore
+            FileOperations.SaveUserData(userData)
 
         if args.Count > 0 then
             let mutable pluginFound = false
@@ -38,8 +38,12 @@ module Program =
                         try
                             if innerArguments.Count >= command.RequiredArgCount then
                                 let result = command.Execute(innerArguments, userData, client, takeAdditionalInput, fun innerArgs innerClient innerUserData innerIsInteractive -> ProcessCommand(innerArgs, innerClient, innerUserData, innerIsInteractive, commands))
-                                if result = -1 then
+                                if result < 0 then
                                     Prints.PrintAsColorNewLine("The command completed with an unsuccessful status code.", ConsoleColor.Red, Console.BackgroundColor)
+                                if result = -2 then
+                                    Prints.PrintAsColorNewLine("Not enough arguments were given for the selected command", ConsoleColor.Red, Console.BackgroundColor)
+                                    Console.WriteLine()
+                                    Prints.PrintCommandInfo(command, "")
                             else
                                 Prints.PrintAsColorNewLine("Not enough arguments were given for the selected command", ConsoleColor.Red, Console.BackgroundColor)
                                 Console.WriteLine()
@@ -155,13 +159,25 @@ module Program =
                 with
                     ex -> ex |> ignore
             result
-        let client = new InvidiousAPIClient()
+        let mutable client = new InvidiousAPIClient()
+        let mutable defaultServer = null
+        let mutable cacheEnabled = true
+        let mutable settingChanged = false
         if args.Length = 0 then
             // Running with no arguments
             // interactive prompt
             Prints.PrintGreeting()
             let userData = FileOperations.GetExistingUserData(FirstTimeSetupWrapper(commands))
             while true do
+                if defaultServer <> userData.Settings.DefaultServer() then
+                    defaultServer <- userData.Settings.DefaultServer()
+                    settingChanged <- true
+                if cacheEnabled <> userData.Settings.IsCacheEnabled() then
+                    cacheEnabled <- userData.Settings.IsCacheEnabled()
+                    settingChanged <- true
+                if settingChanged then
+                    client <- new InvidiousAPIClient(cacheEnabled, defaultServer)
+                    settingChanged <- false
                 let input = System.Console.ReadLine()
                 ProcessCommand(input.Split(" "), client, userData, true, commands) |> ignore
             done
@@ -173,5 +189,10 @@ module Program =
             // Don't run first time setup because it will trigger an interactive prompt
             if File.Exists(Paths.UserDataPath) then
                 userData <- FileOperations.GetExistingUserData(FirstTimeSetupWrapper(commands))
+                if defaultServer <> userData.Settings.DefaultServer() then
+                    defaultServer <- userData.Settings.DefaultServer()
+                if cacheEnabled <> userData.Settings.IsCacheEnabled() then
+                    cacheEnabled <- userData.Settings.IsCacheEnabled()
+                client <- new InvidiousAPIClient(cacheEnabled, defaultServer)
             ProcessCommand(args, client, userData, false, commands) |> ignore
             0

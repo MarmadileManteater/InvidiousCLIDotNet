@@ -11,6 +11,7 @@
     <Compile Include="MediaPlayerCommand.fs" />
     <Compile Include="HistoryCommand.fs" />
     <Compile Include="LinkCommand.fs" />
+    <Compile Include="SettingsCommand.fs" />
   </ItemGroup>
 
 	<ItemGroup>

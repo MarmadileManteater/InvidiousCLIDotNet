@@ -29,5 +29,5 @@ type ICommand =
     /// <summary>
     /// Execute the command
     /// </summary>
-    abstract Execute : IList<string> * UserData * IInvidiousAPIClient * bool * Action<IList<string>, IInvidiousAPIClient, UserData, bool> -> int
+    abstract Execute : args: IList<string> * userData: UserData * client: IInvidiousAPIClient * isInteractive : bool * processCommand: Action<IList<string>, IInvidiousAPIClient, UserData, bool> -> int
 end

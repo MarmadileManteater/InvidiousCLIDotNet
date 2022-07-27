@@ -18,7 +18,7 @@ type SearchCommand() =
             results.Add("@param query : string")
             results.Add("search {query}")
             results
-        member this.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand : Action<IList<string>, IInvidiousAPIClient, UserData, bool>): int = 
+        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             // If there are enough arguments,
             let mutable query = ""
             let mutable i = 0

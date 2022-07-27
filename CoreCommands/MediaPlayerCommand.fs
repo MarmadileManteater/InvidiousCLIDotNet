@@ -22,7 +22,7 @@ type MediaPlayerCommand() =
             results.Add("@param media-player-index : int - the index of the media player to set to primary")
             results.Add("media-player set-primary {media-player-index}")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, interactive : bool, processCommand : Action<IList<string>, IInvidiousAPIClient, UserData, bool>): int = 
+        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "add" then
                 try
                     let mutable executablePath = ""
