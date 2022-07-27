@@ -90,12 +90,8 @@ type SettingsCommand() =
                     dictionary["default_server"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
 
                 if dictionary.ContainsKey("video_history") = false then
-                    try
-                        let value = if userData.Settings.IsWatchHistoryEnabled() then "enable" else "disable"
-                        dictionary["video_history"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
-                    with
-                        ex ->
-                            dictionary["video_history"] <- new KeyValuePair<string, List<ConsoleColor>>("disable", consoleColors)
+                    let value = if userData.Settings.IsWatchHistoryEnabled() then "enable" else "disable"
+                    dictionary["video_history"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
                 Prints.PrintDictionaryWithColor(dictionary)
                 Console.WriteLine()
                 0
