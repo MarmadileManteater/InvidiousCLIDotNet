@@ -50,7 +50,7 @@ jobs:
     
     - name: Copy core commands build output to Invidious CLI out directory
       run: |
-        cp CoreCommands/bin/Debug/net6.0/* InvidiousCLI/bin/Debug/net6.0
+        cp CoreCommands/bin/Debug/net6.0 InvidiousCLI/bin/Debug/net6.0/CoreCommands
 
     - name: Upload the output directory
       uses: actions/upload-artifact@v2

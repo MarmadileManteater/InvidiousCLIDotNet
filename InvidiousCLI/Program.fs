@@ -147,7 +147,7 @@ module Program =
         let pluginPaths = new List<string>()
         // try to look for core commands in these locations
         pluginPaths.Add(@"..\..\..\..\CoreCommands\bin\Debug\net6.0\CoreCommands.dll")
-        pluginPaths.Add(@"CoreCommands.dll")
+        pluginPaths.Add(@"CoreCommands/CoreCommands.dll")
         // Paths to plugins to load.
         let commands : IList<ICommand> = 
             let result = new List<ICommand>();
