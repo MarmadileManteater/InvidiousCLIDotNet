@@ -7,7 +7,7 @@ open Newtonsoft.Json
 open MarmadileManteater.InvidiousClient.Objects.Data
 open MarmadileManteater.InvidiousClient.Extensions
 
-type Settings internal (hasSetting : Func<string, bool>, getSetting : Func<string, JToken>, setSetting : Action<string, JToken>) =
+type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken>, setSetting : Action<string, JToken>) =
     
     member self.DefaultServer (?value : string) =
         if value = None then
