@@ -11,6 +11,9 @@ open Newtonsoft.Json.Linq
 open MarmadileManteater.InvidiousCLI.Functions
 open System
 open MarmadileManteater.InvidiousCLI.Enums
+open System.IO
+open MarmadileManteater.InvidiousCLI
+open System.Net.Http
 
 type WatchCommand() =
     interface ICommand with
@@ -34,6 +37,7 @@ type WatchCommand() =
             fields.Add("formatStreams")
             fields.Add("adaptiveFormats")
             fields.Add("title")
+            fields.Add("captions")
             if isVideoHistoryEnabled then
                 fields.Add("videoId")
                 fields.Add("lengthSeconds")
@@ -60,7 +64,19 @@ type WatchCommand() =
                 if userData.MediaPlayers.Count > 0 then
                     let primaryMediaPlayer = userData.GetPrimaryMediaPlayer()
                     let primaryMediaPlayerName = primaryMediaPlayer["name"].ToString()
-                    let inputSlave = if secondaryStreams.Count <> 0 then " --input-slave=" + secondaryStreams.FirstOrDefault().Url else "" 
+                    let mutable inputSlave = if secondaryStreams.Count <> 0 then " --input-slave=" + secondaryStreams.FirstOrDefault().Url else "" 
+                    if videoObject.Captions.Count > 0 then
+                        let caption = videoObject.Captions.Where(fun x -> x.LanguageCode = "en-US").Last()
+                        let httpClient = new HttpClient()
+                        let response = httpClient.Send(new HttpRequestMessage(HttpMethod.Get, caption.Url))
+                        let videoDirectory = Path.Join(Paths.Temp,videoId)
+                        let captionsPath = Path.Join(videoDirectory, caption.Label + ".srt")
+                        if Directory.Exists(videoDirectory) <> true then
+                            Directory.CreateDirectory(videoDirectory) |> ignore
+                        let task = response.Content.ReadAsStringAsync()
+                        task.Wait()
+                        File.WriteAllText(captionsPath, task.Result)
+                        inputSlave <- inputSlave + " --sub-file=\"" + captionsPath + "\""
                     programSpecificArguments <- if primaryMediaPlayerName.Contains("vlc") = true then inputSlave + " --meta-title=\"" + videoObject.Title + "\" --no-one-instance" else ""
                 processStartInfo.Arguments <- if userData.MediaPlayers.Count > 0 then mediumQualityStreams.FirstOrDefault().Url + programSpecificArguments else ""
                 processStartInfo.UseShellExecute <- true
@@ -85,8 +101,8 @@ type WatchCommand() =
                         Console.WriteLine()
                         Prints.PrintAsColorNewLine("The response code indicates the content was not found.", ConsoleColor.Red, Console.BackgroundColor)
                     -1
-        member self.Match: MatchType = 
-            MatchType.Equals
+        member self.Match: Enums.MatchType = 
+            Enums.MatchType.Equals
         member self.Name: string = 
             "watch"
         member this.RequiredArgCount: int = 
