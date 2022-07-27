@@ -51,6 +51,7 @@ module Program =
                         with
                             ex ->
                                 Prints.PrintAsColorNewLine("The command did not complete.", ConsoleColor.Red, Console.BackgroundColor)
+                                Prints.PrintAsColorNewLine(ex.Message, ConsoleColor.White, ConsoleColor.Red)
                                 Console.WriteLine()
                                 Prints.PrintCommandInfo(command, "")
             if args[0] = "help" then
