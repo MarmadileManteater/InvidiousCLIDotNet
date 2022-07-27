@@ -1,11 +1,7 @@
 ﻿namespace MarmadileManteater.InvidiousCLI.Objects
 
-open System.Collections.Generic
 open Newtonsoft.Json.Linq
 open System
-open Newtonsoft.Json
-open MarmadileManteater.InvidiousClient.Objects.Data
-open MarmadileManteater.InvidiousClient.Extensions
 
 type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken>, setSetting : Action<string, JToken>) =
     
