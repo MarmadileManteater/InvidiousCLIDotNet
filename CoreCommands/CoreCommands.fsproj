@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Compile Include="WatchCommand.fs" />
+    <Compile Include="DownloadCommand.fs" />
     <Compile Include="SearchCommand.fs" />
     <Compile Include="MediaPlayerCommand.fs" />
     <Compile Include="HistoryCommand.fs" />
