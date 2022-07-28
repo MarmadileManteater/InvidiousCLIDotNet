@@ -31,14 +31,23 @@ type MediaPlayerCommand() =
                         executablePath <- executablePath + arg + " "
                         i <- i + 1
                     done
-                    let executableUri = new Uri(executablePath)
-                    let fileName = executableUri.Segments.LastOrDefault()
+                    let executableUri = executablePath.Split("/")
+                    let mutable fileName = executableUri.LastOrDefault()
+                    let mutable arguments = ""
+                    if fileName.Contains(" ") then
+                        let fileNameSplit = fileName.Split(" ")
+                        fileName <- fileNameSplit[0]
+                        if fileNameSplit.Count() > 1 then
+                            arguments <- fileNameSplit[1]
+                            for i in 2..fileNameSplit.Count() do
+                                arguments <- arguments + " " + fileNameSplit[i]
                     let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
                     let path = executablePath.Substring(0, executablePath.Length - fileName.Length - 1)
                     let mediaPlayer = new JObject()
                     mediaPlayer.Add("name", appName)
                     mediaPlayer.Add("executable_path", executablePath)
                     mediaPlayer.Add("working_directory", path)
+                    mediaPlayer.Add("arguments", arguments)
                     userData.AddMediaPlayer(mediaPlayer)
                     FileOperations.SaveUserData(userData)
                     Prints.PrintAsColorNewLine("Media player \"" + appName + "\" added successfully!", ConsoleColor.Green, Console.BackgroundColor)

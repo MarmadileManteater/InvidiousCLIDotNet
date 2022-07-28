@@ -66,26 +66,28 @@ module Program =
     let FirstTimeSetupWrapper(commands : IList<ICommand>) =
         let FirstTimeSetup (userData : UserData) =
             Prints.PrintAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
-            let checkForExistingPlayer (playerExecutable : string, workingDirectory : string) =
+            let checkForExistingPlayer (playerExecutable : string, workingDirectory : string, arguments : string) =
                 if File.Exists(playerExecutable) then
                     let playerName = playerExecutable.Split(workingDirectory)[1]
                     let mediaPlayer = new JObject()
                     mediaPlayer.Add("name", playerName)
                     mediaPlayer.Add("executable_path", playerExecutable)
                     mediaPlayer.Add("working_directory", workingDirectory)
+                    mediaPlayer.Add("arguments", arguments)
                     userData.AddMediaPlayer(mediaPlayer)
                     FileOperations.SaveUserData(userData)
                     Prints.PrintAsColorNewLine(playerName + " automatically added!", ConsoleColor.Green, Console.BackgroundColor)
+            let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
             // #region Windows
-            checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\")
-            checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/")
+            checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\", "")
+            checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/", vlcArguments)
             // #endregion
             // #region WSL
-            checkForExistingPlayer("/mnt/c/Program Files (x86)/Windows Media Player/wmplayer.exe", "/mnt/c/Program Files (x86)/Windows Media Player/")
-            checkForExistingPlayer("/mnt/c/Program Files/VideoLAN/VLC/vlc.exe", "/mnt/c/Program Files/VideoLAN/VLC/")
+            checkForExistingPlayer("/mnt/c/Program Files (x86)/Windows Media Player/wmplayer.exe", "/mnt/c/Program Files (x86)/Windows Media Player/", "")
+            checkForExistingPlayer("/mnt/c/Program Files/VideoLAN/VLC/vlc.exe", "/mnt/c/Program Files/VideoLAN/VLC/", vlcArguments)
             // #endregion
             // #region Linux
-            checkForExistingPlayer("/usr/bin/vlc", "/usr/bin/")
+            checkForExistingPlayer("/usr/bin/vlc", "/usr/bin/", vlcArguments)
             // #endregion
             let mutable command = new List<string>()
             command.Add("media-player")

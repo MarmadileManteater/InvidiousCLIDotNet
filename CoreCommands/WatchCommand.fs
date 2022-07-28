@@ -57,14 +57,11 @@ type WatchCommand() =
                     mediumQualityStreams <- mediumQualityStreams.Reverse()
                 // start up the first media player listed in the user data
                 let processStartInfo = if userData.MediaPlayers.Count > 0 then new ProcessStartInfo(userData.GetPrimaryMediaPlayer().Value<string>("executable_path")) else new ProcessStartInfo(mediumQualityStreams.FirstOrDefault().Url)
-                // use a combination of both the audio and video streams for the arguments
-                // currently, this method only really works for VLC
-                // i have an idea for how to make this better, but it will involve adding another member to MediaPlayer
-                let mutable programSpecificArguments = ""
+                let mutable arguments = ""
                 if userData.MediaPlayers.Count > 0 then
                     let primaryMediaPlayer = userData.GetPrimaryMediaPlayer()
-                    let primaryMediaPlayerName = primaryMediaPlayer["name"].ToString()
-                    let mutable inputSlave = if secondaryStreams.Count <> 0 then " --input-slave=" + secondaryStreams.FirstOrDefault().Url else "" 
+                    arguments <- if primaryMediaPlayer["arguments"] <> null then primaryMediaPlayer["arguments"].Value<string>() else ""
+                    arguments <- arguments.Replace("{audio_stream}", secondaryStreams.FirstOrDefault().Url) 
                     if videoObject.Captions.Count > 0 then
                         let captions = videoObject.Captions.Where(fun x -> x.LanguageCode.Contains("en"))
                         if captions.Count() > 0 then
@@ -80,10 +77,10 @@ type WatchCommand() =
                             let content = task.Result
                             if content.Split("\n").Count() > 5 then
                                 File.WriteAllText(captionsPath, content)
-                                inputSlave <- inputSlave + " --sub-file=\"" + captionsPath + "\""
+                                arguments <- arguments.Replace("{subtitle_file}", captionsPath)
 
-                    programSpecificArguments <- if primaryMediaPlayerName.Contains("vlc") = true then inputSlave + " --meta-title=\"" + videoObject.Title + "\" --no-one-instance" else ""
-                processStartInfo.Arguments <- if userData.MediaPlayers.Count > 0 then mediumQualityStreams.FirstOrDefault().Url + programSpecificArguments else ""
+                    arguments <- arguments.Replace("{title}", videoObject.Title)
+                processStartInfo.Arguments <- if userData.MediaPlayers.Count > 0 then mediumQualityStreams.FirstOrDefault().Url + " " + arguments else ""
                 processStartInfo.UseShellExecute <- true
                 processStartInfo.WorkingDirectory <- if userData.MediaPlayers.Count > 0 then userData.GetPrimaryMediaPlayer().Value<string>("working_directory") else processStartInfo.WorkingDirectory
                 if isVideoHistoryEnabled then
