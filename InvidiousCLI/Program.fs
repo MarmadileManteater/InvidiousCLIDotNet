@@ -78,6 +78,7 @@ module Program =
                     FileOperations.SaveUserData(userData)
                     Prints.PrintAsColorNewLine(playerName + " automatically added!", ConsoleColor.Green, Console.BackgroundColor)
             let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
+            let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\" --lavfi-complex='[vid1] [vid2] vstack [vo]' "
             // #region Windows
             checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\", "")
             checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/", vlcArguments)
@@ -117,21 +118,11 @@ module Program =
                     // If the user wants to setup a media player,
                     Prints.PrintAsColor("Media Player executable path:", ConsoleColor.DarkYellow, ConsoleColor.Black)
                     let executablePath = System.Console.ReadLine()
-                    try
-                        let executableUri = new Uri(executablePath)
-                        let fileName = executableUri.Segments.LastOrDefault()
-                        let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
-                        let path = executablePath.Substring(0, executablePath.Length - fileName.Length)
-                        let mediaPlayer = new JObject()
-                        mediaPlayer.Add("name", appName)
-                        mediaPlayer.Add("executable_path", executablePath)
-                        mediaPlayer.Add("working_directory", path)
-                        userData.AddMediaPlayer(mediaPlayer)
-                        FileOperations.SaveUserData(userData)
-                    with
-                        | ex ->
-                            Prints.PrintAsColorNewLine("There was some issue adding the given media player path.", ConsoleColor.Red, Console.BackgroundColor)
-                            Prints.PrintAsColorNewLine(ex.Message, ConsoleColor.Red, Console.BackgroundColor)
+                    command <- new List<string>()
+                    command.Add("media-player")
+                    command.Add("add")
+                    command.Add(executablePath)
+                    ProcessCommand(command, null, userData, true, commands)
             else
                 let result = try input |> int |> Nullable<int>
                                 with:? FormatException ->

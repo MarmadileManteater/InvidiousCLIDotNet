@@ -9,6 +9,8 @@ open Newtonsoft.Json.Linq
 open MarmadileManteater.InvidiousCLI.Functions
 open System
 open MarmadileManteater.InvidiousCLI.Enums
+open System.IO
+open MarmadileManteater.InvidiousCLI
 
 type MediaPlayerCommand() =
     interface ICommand with
@@ -28,7 +30,8 @@ type MediaPlayerCommand() =
                     let mutable executablePath = ""
                     let mutable i = 0
                     for arg in args do
-                        executablePath <- executablePath + arg + " "
+                        if i <> 0 then
+                            executablePath <- executablePath + arg + " "
                         i <- i + 1
                     done
                     let executableUri = executablePath.Split("/")
@@ -39,10 +42,11 @@ type MediaPlayerCommand() =
                         fileName <- fileNameSplit[0]
                         if fileNameSplit.Count() > 1 then
                             arguments <- fileNameSplit[1]
-                            for i in 2..fileNameSplit.Count() do
+                            for i in 2..fileNameSplit.Count() - 1 do
                                 arguments <- arguments + " " + fileNameSplit[i]
                     let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
-                    let path = executablePath.Substring(0, executablePath.Length - fileName.Length - 1)
+                    executablePath <- executablePath.Replace(arguments, "")
+                    let path = executablePath.Split(appName)[0]
                     let mediaPlayer = new JObject()
                     mediaPlayer.Add("name", appName)
                     mediaPlayer.Add("executable_path", executablePath)
@@ -88,8 +92,8 @@ type MediaPlayerCommand() =
                         -1
             else
                 -1
-        member self.Match: MatchType = 
-            MatchType.Equals
+        member self.Match: Enums.MatchType = 
+            Enums.MatchType.Equals
         member self.Name: string = 
             "media-player"
         member this.RequiredArgCount: int = 

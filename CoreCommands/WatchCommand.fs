@@ -61,7 +61,8 @@ type WatchCommand() =
                 if userData.MediaPlayers.Count > 0 then
                     let primaryMediaPlayer = userData.GetPrimaryMediaPlayer()
                     arguments <- if primaryMediaPlayer["arguments"] <> null then primaryMediaPlayer["arguments"].Value<string>() else ""
-                    arguments <- arguments.Replace("{audio_stream}", secondaryStreams.FirstOrDefault().Url) 
+                    let audioStream = if secondaryStreams.Count > 0 then secondaryStreams.Last().Url else mediumQualityStreams.First().Url
+                    arguments <- arguments.Replace("{audio_stream}", audioStream)
                     if videoObject.Captions.Count > 0 then
                         let captions = videoObject.Captions.Where(fun x -> x.LanguageCode.Contains("en"))
                         if captions.Count() > 0 then
