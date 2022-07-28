@@ -52,8 +52,8 @@ type DownloadCommand() =
                             for caption in captions do
                                 let httpClient = new HttpClient()
                                 let response = httpClient.Send(new HttpRequestMessage(HttpMethod.Get, caption.Url))
-                                let videoDirectory = Path.Join(Paths.Temp,videoId)
-                                let captionsPath = Path.Join(videoDirectory, caption.Label + ".srt")
+                                let videoDirectory = Path.Join(downloadDirectory, videoId)
+                                let captionsPath = Path.Join(videoDirectory, videoId + "." + caption.LanguageCode + ".srt")
                                 if Directory.Exists(videoDirectory) <> true then
                                     Directory.CreateDirectory(videoDirectory) |> ignore
                                 let task = response.Content.ReadAsStringAsync()
@@ -74,7 +74,7 @@ type DownloadCommand() =
                 ex -> Prints.PrintAsColorNewLine(ex.Message, ConsoleColor.Yellow, Console.BackgroundColor)
             let predicate = fun (formatStream: FormatStream) -> 
                 (formatStream.QualityLabel = quality && itag = null)  || 
-                (quality = null && formatStream.Itag = itag)
+                (quality = itag && formatStream.Itag = itag)
             client.DownloadFirstMatchingVideoFormatSync(videoId, downloadDirectory, predicate)
             0
         member self.Match: Enums.MatchType = 
