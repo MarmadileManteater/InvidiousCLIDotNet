@@ -20,17 +20,23 @@ type DownloadCommand() =
         member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param videoId : string")
-            results.Add("@param path : string (optional)")
             results.Add("@param qualityOrItag : string (optional)")
-            results.Add("download {videoId} {path} {qualityOrItag}")
+            results.Add("@param path : string (optional)")
+            results.Add("download {videoId} {qualityOrItag} {path}")
             results
         member this.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()
             let videoId = args[0]
-            let downloadDirectory = if args.Count > 1 then args[1] else Paths.Temp
+            let quality = if args.Count > 1 then args[1] else userData.Settings.DefaultFormat()
             // the second argument is the quality or
-            let quality = if args.Count > 2 then args[2] else userData.Settings.DefaultFormat()
+            let mutable directory = ""
+            if args.Count > 1 then
+                for i in 1..args.Count - 1 do
+                    directory <- args[i]
+                    if i <> args.Count - 1 then
+                        directory <- " "
+            let downloadDirectory = directory
             // if the second argument doesn't contain the letter 'p', it is interpreted as an itag
             let itag = if quality.Contains('p') then null else quality
             let fields = new List<string>()
