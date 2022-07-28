@@ -68,15 +68,7 @@ module Program =
             Prints.PrintAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
             let checkForExistingPlayer (playerExecutable : string, workingDirectory : string, arguments : string) =
                 if File.Exists(playerExecutable) then
-                    let playerName = playerExecutable.Split(workingDirectory)[1]
-                    let mediaPlayer = new JObject()
-                    mediaPlayer.Add("name", playerName)
-                    mediaPlayer.Add("executable_path", playerExecutable)
-                    mediaPlayer.Add("working_directory", workingDirectory)
-                    mediaPlayer.Add("arguments", arguments)
-                    userData.AddMediaPlayer(mediaPlayer)
-                    FileOperations.SaveUserData(userData)
-                    Prints.PrintAsColorNewLine(playerName + " automatically added!", ConsoleColor.Green, Console.BackgroundColor)
+                    ProcessCommand(("media-player add" + " " + playerExecutable + " " + arguments).Split(" ").ToList<string>(), null, userData, false, commands)
             let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
             let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\" --lavfi-complex='[vid1] [vid2] vstack [vo]' "
             // #region Windows

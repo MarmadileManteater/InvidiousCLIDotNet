@@ -34,7 +34,7 @@ type MediaPlayerCommand() =
                             executablePath <- executablePath + arg + " "
                         i <- i + 1
                     done
-                    let executableUri = executablePath.Split("/")
+                    let executableUri = executablePath.Replace("\\", "/").Split("/")
                     let mutable fileName = executableUri.LastOrDefault()
                     let mutable arguments = ""
                     if fileName.Contains(" ") then
