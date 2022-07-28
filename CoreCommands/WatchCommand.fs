@@ -66,17 +66,22 @@ type WatchCommand() =
                     let primaryMediaPlayerName = primaryMediaPlayer["name"].ToString()
                     let mutable inputSlave = if secondaryStreams.Count <> 0 then " --input-slave=" + secondaryStreams.FirstOrDefault().Url else "" 
                     if videoObject.Captions.Count > 0 then
-                        let caption = videoObject.Captions.Where(fun x -> x.LanguageCode = "en-US").Last()
-                        let httpClient = new HttpClient()
-                        let response = httpClient.Send(new HttpRequestMessage(HttpMethod.Get, caption.Url))
-                        let videoDirectory = Path.Join(Paths.Temp,videoId)
-                        let captionsPath = Path.Join(videoDirectory, caption.Label + ".srt")
-                        if Directory.Exists(videoDirectory) <> true then
-                            Directory.CreateDirectory(videoDirectory) |> ignore
-                        let task = response.Content.ReadAsStringAsync()
-                        task.Wait()
-                        File.WriteAllText(captionsPath, task.Result)
-                        inputSlave <- inputSlave + " --sub-file=\"" + captionsPath + "\""
+                        let captions = videoObject.Captions.Where(fun x -> x.LanguageCode.Contains("en"))
+                        if captions.Count() > 0 then
+                            let caption = captions.Last()
+                            let httpClient = new HttpClient()
+                            let response = httpClient.Send(new HttpRequestMessage(HttpMethod.Get, caption.Url))
+                            let videoDirectory = Path.Join(Paths.Temp,videoId)
+                            let captionsPath = Path.Join(videoDirectory, caption.Label + ".srt")
+                            if Directory.Exists(videoDirectory) <> true then
+                                Directory.CreateDirectory(videoDirectory) |> ignore
+                            let task = response.Content.ReadAsStringAsync()
+                            task.Wait()
+                            let content = task.Result
+                            if content.Split("\n").Count() > 5 then
+                                File.WriteAllText(captionsPath, content)
+                                inputSlave <- inputSlave + " --sub-file=\"" + captionsPath + "\""
+
                     programSpecificArguments <- if primaryMediaPlayerName.Contains("vlc") = true then inputSlave + " --meta-title=\"" + videoObject.Title + "\" --no-one-instance" else ""
                 processStartInfo.Arguments <- if userData.MediaPlayers.Count > 0 then mediumQualityStreams.FirstOrDefault().Url + programSpecificArguments else ""
                 processStartInfo.UseShellExecute <- true
