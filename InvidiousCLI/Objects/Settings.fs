@@ -5,14 +5,15 @@ open System
 
 type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken>, setSetting : Action<string, JToken>) =
     
-    member self.DefaultServer (?value : string) =
+    member self.AreSubtitlesEnabled (?value : bool) : bool =
         if value = None then
-            if hasSetting.Invoke("default_server") then
-                getSetting.Invoke("default_server").Value<string>()
+            if hasSetting.Invoke("subtitles") then
+                getSetting.Invoke("subtitles").Value<string>() = "enable"
             else
-                null// Default Value
+                false
         else
-            setSetting.Invoke("default_server", value.Value)
+            let result = if value.Value then "enable" else "disable"
+            setSetting.Invoke("subtitles", result)
             value.Value
     
     member self.DefaultFormat (?value : string) =
@@ -25,6 +26,25 @@ type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken
             setSetting.Invoke("default_format", value.Value)
             value.Value
     
+    member self.DefaultServer (?value : string) =
+        if value = None then
+            if hasSetting.Invoke("default_server") then
+                getSetting.Invoke("default_server").Value<string>()
+            else
+                null// Default Value
+        else
+            setSetting.Invoke("default_server", value.Value)
+            value.Value
+
+    member self.SubtitleLanguage (?value : string) =
+        if value = None then
+            if hasSetting.Invoke("subtitle_language") then
+                getSetting.Invoke("subtitle_language").Value<string>()
+            else
+                "en"// Default Value
+        else
+            setSetting.Invoke("subtitle_language", value.Value)
+            value.Value
 
     member self.IsCacheEnabled (?value : bool) : bool =
         if value = None then

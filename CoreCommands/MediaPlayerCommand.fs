@@ -14,7 +14,7 @@ open MarmadileManteater.InvidiousCLI
 
 type MediaPlayerCommand() =
     interface ICommand with
-        member self.Description: string = 
+        member self.Description: string =
             "Adds and lists media players available in the file located in \"" + Paths.UserDataPath + "\""
         member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
@@ -45,7 +45,8 @@ type MediaPlayerCommand() =
                             for i in 2..fileNameSplit.Count() - 1 do
                                 arguments <- arguments + " " + fileNameSplit[i]
                     let appName = if fileName.Contains(".exe") then fileName.Split(".exe")[0] else fileName
-                    executablePath <- executablePath.Replace(arguments, "")
+                    if arguments.Trim().Length > 0 then
+                        executablePath <- executablePath.Replace(arguments.Trim(), "")
                     let path = executablePath.Split(appName)[0]
                     let mediaPlayer = new JObject()
                     mediaPlayer.Add("name", appName)

@@ -63,6 +63,7 @@ module Program =
             elif pluginFound = false then
                 let command = args[0]
                 Prints.PrintAsColorNewLine("\"" + command + "\" is not recognized as a command.", ConsoleColor.Red, Console.BackgroundColor)
+    
     let FirstTimeSetupWrapper(commands : IList<ICommand>) =
         let FirstTimeSetup (userData : UserData) =
             Prints.PrintAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
@@ -127,6 +128,7 @@ module Program =
                         command.Add(input)
                         ProcessCommand(command, null, userData, true, commands)
         FirstTimeSetup
+    
     [<EntryPoint>]
     let Main(args) =
         let pluginPaths = new List<string>()

@@ -27,6 +27,7 @@ type WatchCommand() =
             results
         member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int =  
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
+            let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()
             let videoId = args[0]
             // the second argument is the quality or
             let quality = if args.Count > 1 then args[1] else userData.Settings.DefaultFormat()
@@ -37,7 +38,8 @@ type WatchCommand() =
             fields.Add("formatStreams")
             fields.Add("adaptiveFormats")
             fields.Add("title")
-            fields.Add("captions")
+            if areSubtitlesEnabled then
+                fields.Add("captions")
             if isVideoHistoryEnabled then
                 fields.Add("videoId")
                 fields.Add("lengthSeconds")
@@ -63,8 +65,8 @@ type WatchCommand() =
                     arguments <- if primaryMediaPlayer["arguments"] <> null then primaryMediaPlayer["arguments"].Value<string>() else ""
                     let audioStream = if secondaryStreams.Count > 0 then secondaryStreams.Last().Url else mediumQualityStreams.First().Url
                     arguments <- arguments.Replace("{audio_stream}", audioStream)
-                    if videoObject.Captions.Count > 0 then
-                        let captions = videoObject.Captions.Where(fun x -> x.LanguageCode.Contains("en"))
+                    if videoObject.Captions.Count > 0 && areSubtitlesEnabled then
+                        let captions = videoObject.Captions.Where(fun x -> x.LanguageCode.Contains(userData.Settings.SubtitleLanguage()))
                         if captions.Count() > 0 then
                             let caption = captions.Last()
                             let httpClient = new HttpClient()
@@ -79,7 +81,10 @@ type WatchCommand() =
                             if content.Split("\n").Count() > 5 then
                                 File.WriteAllText(captionsPath, content)
                                 arguments <- arguments.Replace("{subtitle_file}", captionsPath)
-
+                        else
+                            arguments <- arguments.Replace("{subtitle_file}", "")
+                    else
+                        arguments <- arguments.Replace("{subtitle_file}", "")
                     arguments <- arguments.Replace("{title}", videoObject.Title)
                 processStartInfo.Arguments <- if userData.MediaPlayers.Count > 0 then mediumQualityStreams.FirstOrDefault().Url + " " + arguments else ""
                 processStartInfo.UseShellExecute <- true
