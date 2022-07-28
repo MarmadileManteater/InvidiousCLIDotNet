@@ -20,8 +20,9 @@ type DownloadCommand() =
         member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param videoId : string")
+            results.Add("@param path : string (optional)")
             results.Add("@param qualityOrItag : string (optional)")
-            results.Add("watch {videoId} {qualityOrItag}")
+            results.Add("download {videoId} {path} {qualityOrItag}")
             results
         member this.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
