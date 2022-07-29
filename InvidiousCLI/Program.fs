@@ -12,10 +12,11 @@ open MarmadileManteater.InvidiousCLI.Functions
 open MarmadileManteater.InvidiousCLI.Interfaces
 
 module Program =
-    // This is the central entry point for all of the command processing.
-    // It is recursive to handle commands that need to be parsed before processing.
-    // If a user enters a link, it parses out the id for the video and runs
-    // processCommand(["watch", "{videoId}"], client, userData, false) where {videoId} is id pulled out of the link.
+    /// <summary>
+    ///  This is the central entry point for all of the command processing.
+    ///  It is recursive to handle commands that need to be parsed before processing.
+    ///  If a user enters a link, it parses out the id for the video and runs. 
+    /// </summary>
     let rec ProcessCommand (args : IList<string>, client : IInvidiousAPIClient, userData : UserData, takeAdditionalInput : bool, commands : IList<ICommand>) =
         // Saving to command history
         if userData.Settings.IsCommandHistoryEnabled() then
@@ -71,7 +72,7 @@ module Program =
                 if File.Exists(playerExecutable) then
                     ProcessCommand(("media-player add" + " " + playerExecutable + " " + arguments).Split(" ").ToList<string>(), null, userData, false, commands)
             let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
-            let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\" --lavfi-complex='[vid1] [vid2] vstack [vo]' "
+            let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\""
             // #region Windows
             checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\", "")
             checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/", vlcArguments)

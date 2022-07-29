@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="PlaylistCommand.fs" />
     <Compile Include="WatchCommand.fs" />
     <Compile Include="DownloadCommand.fs" />
     <Compile Include="SearchCommand.fs" />
