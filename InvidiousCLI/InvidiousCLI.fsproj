@@ -11,6 +11,9 @@
     <Authors>MarmadileManteater</Authors>
     <Copyright>MIT License Copyright (c) 2022 MarmadileManteater</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>$(AssemblyName).PluginLibrary</PackageId>
+    <Product>$(AssemblyName) Plugin Library</Product>
+    <Description>A library for creating plugins for InvidiousCLIDotNet</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -38,7 +41,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\README.md">
+    <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
