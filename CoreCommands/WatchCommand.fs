@@ -101,7 +101,7 @@ type WatchCommand() =
                     videoData["videoThumbnails"] <- newThumbnails
                     userData.AddToVideoHistory(videoData) |> ignore
                 FileOperations.SaveUserData(userData)
-                Process.Start(processStartInfo) |> ignore
+                Process.Start(processStartInfo).WaitForExit() |> ignore
                 0
             with 
                 | :? AggregateException as ex -> 
