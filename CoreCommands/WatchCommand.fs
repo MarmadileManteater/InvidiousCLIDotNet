@@ -71,7 +71,7 @@ type WatchCommand() =
                             let caption = captions.Last()
                             let httpClient = new HttpClient()
                             let response = httpClient.Send(new HttpRequestMessage(HttpMethod.Get, caption.Url))
-                            let videoDirectory = Path.Join(Paths.Temp,videoId)
+                            let videoDirectory = Path.Join(userData.Settings.DownloadPath(),videoId)
                             let captionsPath = Path.Join(videoDirectory, caption.Label + ".srt")
                             if Directory.Exists(videoDirectory) <> true then
                                 Directory.CreateDirectory(videoDirectory) |> ignore

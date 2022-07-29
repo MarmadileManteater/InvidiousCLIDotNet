@@ -2,6 +2,7 @@
 
 open Newtonsoft.Json.Linq
 open System
+open System.IO
 
 type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken>, setSetting : Action<string, JToken>) =
     
@@ -34,6 +35,16 @@ type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken
                 null// Default Value
         else
             setSetting.Invoke("default_server", value.Value)
+            value.Value
+    
+    member self.DownloadPath (?value : string) =
+        if value = None then
+            if hasSetting.Invoke("download_path") then
+                getSetting.Invoke("download_path").Value<string>()
+            else
+                Path.GetTempPath()// Default Value
+        else
+            setSetting.Invoke("download_path", value.Value)
             value.Value
 
     member self.SubtitleLanguage (?value : string) =

@@ -96,9 +96,14 @@ type SettingsCommand() =
                 if dictionary.ContainsKey("subtitles") = false then
                     let value = if userData.Settings.AreSubtitlesEnabled() then "enable" else "disable"
                     dictionary["subtitles"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+
                 if dictionary.ContainsKey("subtitle_language") = false then
                     let value = userData.Settings.SubtitleLanguage()
                     dictionary["subtitle_language"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+
+                if dictionary.ContainsKey("download_path") = false then
+                    let value = userData.Settings.DownloadPath()
+                    dictionary["download_path"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
 
                 Prints.PrintDictionaryWithColor(dictionary)
                 Console.WriteLine()
