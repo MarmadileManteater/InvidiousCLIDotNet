@@ -25,6 +25,7 @@
     <Compile Include="Enums\MatchType.fs" />
     <Compile Include="Objects\Settings.fs" />
     <Compile Include="Objects\UserData.fs" />
+    <Compile Include="Interfaces\IPlaylistWriter.fs" />
     <Compile Include="Interfaces\ICommand.fs" />
     <Compile Include="Functions\Prints.fs" />
     <Compile Include="Functions\Paths.fs" />

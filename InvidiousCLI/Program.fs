@@ -142,7 +142,7 @@ module Program =
             for pluginPath in pluginPaths do
                 try
                     let pluginAssembly = Plugins.LoadPlugin(pluginPath)
-                    let resultingCommands = Plugins.CreateCommands(pluginAssembly)
+                    let resultingCommands = Plugins.CreateGenericType<ICommand>(pluginAssembly)
                     for command in resultingCommands do
                         result.Add(command)
                 with

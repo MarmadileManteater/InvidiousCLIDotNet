@@ -32,18 +32,22 @@ module Plugins =
         let pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)))
         let loadContext = new PluginLoadContext(pluginLocation)
         loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(pluginLocation)))
+        
 
-    let CreateCommands (assembly : Assembly): IList<ICommand>  =
-        let results = new List<ICommand>()
+    let CreateGenericType<'T> (assembly : Assembly): IList<'T>  =
+        let results = new List<'T>()
         let mutable count = 0
         for assemblyType : Type in assembly.GetTypes() do
-            if typeof<ICommand>.IsAssignableFrom(assemblyType) then
+            if typeof<'T>.IsAssignableFrom(assemblyType) then
                 let result = Activator.CreateInstance(assemblyType)
                 if result <> null then
                     count <- count + 1
-                    results.Add(result :?> ICommand)
+                    results.Add(result :?> 'T)
         if count = 0 then
             let availableTypes = assembly.GetTypes().Select(fun t -> t.FullName) |> String.concat ","
             raise(new ApplicationException($"Can't find any type which implements ICommand in {assembly} from {assembly.Location}.\n" +
                                            $"Available types: {availableTypes}"))
         results
+
+    let CreateCommands (assembly : Assembly): IList<ICommand>  =
+        CreateGenericType(assembly)

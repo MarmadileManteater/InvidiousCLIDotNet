@@ -11,7 +11,7 @@ type PlaylistCommand() =
     interface ICommand with
         member self.Description: string = 
             "Displays the contents of a playlist"
-        member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
+        member self.Documentation: IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param playlistId : string")
             results.Add("#Views the playlist:")
