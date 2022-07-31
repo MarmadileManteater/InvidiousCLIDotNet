@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Compile Include="Enums\MatchType.fs" />
+    <Compile Include="Objects\SavedPlaylist.fs" />
     <Compile Include="Objects\Settings.fs" />
     <Compile Include="Objects\UserData.fs" />
     <Compile Include="Interfaces\IPluginObject.fs" />

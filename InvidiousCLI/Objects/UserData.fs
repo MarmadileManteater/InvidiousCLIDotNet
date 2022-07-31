@@ -106,6 +106,13 @@ type UserData(data) =
                 newSettings[setting.Key] <- setting.Value
         _data["settings"] <- newSettings
 
+    member self.SavedPlaylists : IList<SavedPlaylist> =
+        let results = new List<SavedPlaylist>()
+        let playlists = if _data.ContainsKey("saved_playlists") then _data["saved_playlists"].Value<JArray>() else new JArray()
+        for playlist in playlists do
+            results.Add(new SavedPlaylist(playlist.Value<JObject>()))
+        results
+
     member self.Settings : Settings =
         let hasSetting = fun key -> self.HasSetting(key)
         let getSetting = fun key -> self.GetSetting(key)
