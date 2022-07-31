@@ -6,8 +6,8 @@ open System.Collections.Generic
 
 type WPL() =
     interface IPlaylistWriter with
-        member this.ExecutableName: string = 
-            "wmplayer"
+        member this.FileType: string = 
+            "wpl"
         member this.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
             let title = playlist.Title
             let author = playlist.Author

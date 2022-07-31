@@ -9,8 +9,8 @@ open MarmadileManteater.InvidiousClient.Objects.Data
 
 type IPlaylistWriter =
     interface
-    /// <summary>The executable name for the media player that this writer will be used for</summary>
-    abstract ExecutableName : string
+    /// <summary>The file type to export to</summary>
+    abstract FileType : string
     /// <summary>
     /// Generates a playlist file from a playlist
     /// </summary>
