@@ -14,15 +14,15 @@ type XSPF() =
             "xspf"
         override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
             let mutable output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-            output <- "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\r\n"
-            output <- "  <trackList>\r\n"
+            output <- output + "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\r\n"
+            output <- output + "  <trackList>\r\n"
             for i in 0..urls.Count - 1 do
                 let video = playlist.Videos[i]
                 let url = urls[i]
-                output <- "    <track>\r\n"
-                output <- $"     <title>${video.Title}</title>\r\n"
-                output <- $"     <location>${url}</location>\r\n"
-                output <- "    </track>\r\n"
-            output <- "  </trackList>\r\n"
-            output <- "</playlist>\r\n"
+                output <- output + "    <track>\r\n"
+                output <- output + $"     <title>{video.Title}</title>\r\n"
+                output <- output + $"     <location>{url}</location>\r\n"
+                output <- output + "    </track>\r\n"
+            output <- output + "  </trackList>\r\n"
+            output <- output + "</playlist>\r\n"
             output

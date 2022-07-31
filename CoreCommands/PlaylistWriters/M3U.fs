@@ -13,11 +13,11 @@ type M3U() =
             "m3u"
         override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
             let mutable output = "#EXTM3U\r\n"
-            output <- "\r\n"
+            output <- output + "\r\n"
             for i in 0..urls.Count - 1 do
                 let video = playlist.Videos[i]
                 let url = urls[i]
-                output <- $"#EXTINF:${video.LengthSeconds}, ${video.Author} - ${video.Title}</title>\r\n"
-                output <- $"${url}\r\n"
-                output <- "\r\n"
+                output <- output + $"#EXTINF:{video.LengthSeconds}, {video.Author} - {video.Title}</title>\r\n"
+                output <- output + $"{url}\r\n"
+                output <- output + "\r\n"
             output

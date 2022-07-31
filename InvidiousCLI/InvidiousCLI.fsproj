@@ -49,7 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="InvidiousClient" Version="1.2.34" />
+    <PackageReference Include="InvidiousClient" Version="1.2.35" />
   </ItemGroup>
 
 </Project>
