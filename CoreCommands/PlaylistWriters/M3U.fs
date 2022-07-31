@@ -6,6 +6,9 @@ open System.Collections.Generic
 
 type M3U() =
     inherit IPlaylistWriter()
+        override self.SupportedPlayers: IList<string> = 
+            let results = new List<string>()
+            results
         override self.FileType: string = 
             "m3u"
         override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 

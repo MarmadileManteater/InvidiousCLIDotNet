@@ -30,6 +30,11 @@ type PlaylistCommand() =
                 results.Add("playlist {playlistId} download")
                 results
             override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+                let primaryMediaPlayerName = userData.GetPrimaryMediaPlayer()["name"]
+                let potentialWriters = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(primaryMediaPlayerName.ToString()))
+                if potentialWriters.Count() > 0 then
+                    let writer = potentialWriters.First()
+                    Console.WriteLine(writer.FileType)
                 raise (System.NotImplementedException())
             override self.Match: Enums.MatchType = 
                 Enums.MatchType.Equals

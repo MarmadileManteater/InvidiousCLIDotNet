@@ -14,6 +14,8 @@ type IPlaylistWriter() =
             "PlaylistWriter"
     /// <summary>The file type to export to</summary>
     abstract FileType : string
+    /// <summary>A list of players that absolutely support this format</summary>
+    abstract SupportedPlayers : IList<string>
     /// <summary>
     /// Generates a playlist file from a playlist
     /// </summary>

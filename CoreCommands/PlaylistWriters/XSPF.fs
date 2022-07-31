@@ -6,6 +6,10 @@ open System.Collections.Generic
 
 type XSPF() =
     inherit IPlaylistWriter()
+        override self.SupportedPlayers: IList<string> = 
+            let results = new List<string>()
+            results.Add("vlc")
+            results
         override self.FileType: string = 
             "xspf"
         override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 

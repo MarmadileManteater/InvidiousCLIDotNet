@@ -6,6 +6,10 @@ open System.Collections.Generic
 
 type WPL() =
     inherit IPlaylistWriter()
+        override self.SupportedPlayers: IList<string> = 
+            let results = new List<string>()
+            results.Add("wmplayer")
+            results
         override self.FileType: string = 
             "wpl"
         override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
