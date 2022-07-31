@@ -50,4 +50,4 @@ module Plugins =
         results
 
     let CreateCommands (assembly : Assembly): IList<ICommand>  =
-        CreateGenericType(assembly)
+        CreateGenericType(assembly) 

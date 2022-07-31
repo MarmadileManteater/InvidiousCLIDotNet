@@ -9,11 +9,12 @@ open MarmadileManteater.InvidiousCLI.Objects
 open MarmadileManteater.InvidiousCLI.Functions
 
 type SettingsCommand() =
-    interface ICommand with
-
-        member self.Description: string = 
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()
+        override self.Description: string = 
             "View or change settings"
-        member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
+        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("settings list")
             results.Add("@param key : string")
@@ -33,7 +34,7 @@ type SettingsCommand() =
             results.Add("- command_history")
             results.Add("  settings set command_history enable")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "set" then
                 if args.Count < 3 then
                     -2// -2 indicating not enough args
@@ -117,10 +118,10 @@ type SettingsCommand() =
                     0
             else
                 -1
-        member self.Match: Enums.MatchType = 
+        override self.Match: Enums.MatchType = 
             Enums.MatchType.Equals
-        member self.Name: string = 
+        override self.Name: string = 
             "settings"
-        member self.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1
 

@@ -7,12 +7,14 @@ open MarmadileManteater.InvidiousClient.Interfaces
 open System
 open MarmadileManteater.InvidiousClient.Objects.Data
 
-type IPlaylistWriter =
-    interface
+[<AbstractClass>]
+type IPlaylistWriter() =
+    interface IPluginObject with
+        member self.ObjectType: string = 
+            "PlaylistWriter"
     /// <summary>The file type to export to</summary>
     abstract FileType : string
     /// <summary>
     /// Generates a playlist file from a playlist
     /// </summary>
     abstract GenerateFileFromPlaylist : playlist : InvidiousPlaylist * urls: IList<string> -> string
-end

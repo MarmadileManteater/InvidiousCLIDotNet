@@ -10,17 +10,19 @@ open MarmadileManteater.InvidiousCLI.Functions
 open System.Linq
 
 type HistoryCommand() =
-    interface ICommand with
-        member self.Description: string = 
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()
+        override self.Description: string = 
             "View the video history for this user data"
-        member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
+        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("history list")
             results.Add("history enable")
             results.Add("history disable")
             results.Add("history clear")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "list" then
                 let mutable page = 0
                 let pageLength = 10
@@ -72,9 +74,9 @@ type HistoryCommand() =
                 Prints.PrintAsColorNewLine("Cleared all history!", ConsoleColor.Green, Console.BackgroundColor)
                 Console.WriteLine()
             0
-        member self.Match: MarmadileManteater.InvidiousCLI.Enums.MatchType = 
+        override self.Match: MarmadileManteater.InvidiousCLI.Enums.MatchType = 
             MatchType.Equals
-        member self.Name: string = 
+        override self.Name: string = 
             "history"
-        member self.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1

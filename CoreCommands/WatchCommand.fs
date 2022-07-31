@@ -16,16 +16,18 @@ open MarmadileManteater.InvidiousCLI
 open System.Net.Http
 
 type WatchCommand() =
-    interface ICommand with
-        member self.Description: string = 
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()
+        override self.Description: string = 
             "Opens a video in the primary media player"
-        member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
+        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param videoId : string")
             results.Add("@param qualityOrItag : string (optional)")
             results.Add("watch {videoId} {qualityOrItag}")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int =  
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int =  
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()
             let videoId = args[0]
@@ -109,9 +111,9 @@ type WatchCommand() =
                         Console.WriteLine()
                         Prints.PrintAsColorNewLine("The response code indicates the content was not found.", ConsoleColor.Red, Console.BackgroundColor)
                     -1
-        member self.Match: Enums.MatchType = 
+        override self.Match: Enums.MatchType = 
             Enums.MatchType.Equals
-        member self.Name: string = 
+        override self.Name: string = 
             "watch"
-        member this.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1

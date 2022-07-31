@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="PlaylistWriters\M3U.fs" />
+    <Compile Include="PlaylistWriters\XSPF.fs" />
     <Compile Include="PlaylistWriters\WPL.fs" />
     <Compile Include="PlaylistCommand.fs" />
     <Compile Include="WatchCommand.fs" />

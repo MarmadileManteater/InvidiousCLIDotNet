@@ -10,15 +10,17 @@ open System
 open MarmadileManteater.InvidiousCLI.Enums
 
 type SearchCommand() =
-    interface ICommand with
-        member self.Description: string = 
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()
+        override self.Description: string = 
             "Performs a search with the given arguments as the query"
-        member self.Documentation: IEnumerable<string> = 
+        override self.Documentation: IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param query : string")
             results.Add("search {query}")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             // If there are enough arguments,
             let mutable query = ""
             let mutable i = 0
@@ -85,9 +87,9 @@ type SearchCommand() =
                             // return control to the main program
                             hasControl <- false
             0
-        member self.Match: MatchType = 
+        override self.Match: MatchType = 
             MatchType.Equals
-        member self.Name: string = 
+        override self.Name: string = 
             "search"
-        member this.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1

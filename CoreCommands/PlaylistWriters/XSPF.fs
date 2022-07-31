@@ -5,10 +5,10 @@ open MarmadileManteater.InvidiousClient.Objects.Data
 open System.Collections.Generic
 
 type XSPF() =
-    interface IPlaylistWriter with
-        member this.FileType: string = 
+    inherit IPlaylistWriter()
+        override self.FileType: string = 
             "xspf"
-        member this.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
+        override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
             let mutable output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
             output <- "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\r\n"
             output <- "  <trackList>\r\n"

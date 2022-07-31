@@ -8,10 +8,12 @@ open MarmadileManteater.InvidiousClient.Interfaces
 open System
 
 type PlaylistCommand() =
-    interface ICommand with
-        member self.Description: string = 
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()//
+        override self.Description: string = 
             "Displays the contents of a playlist"
-        member self.Documentation: IEnumerable<string> = 
+        override self.Documentation: IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param playlistId : string")
             results.Add("#Views the playlist:")
@@ -21,11 +23,11 @@ type PlaylistCommand() =
             results.Add("#Downloads the playlist:")
             results.Add("playlist {playlistId} download")
             results
-        member this.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             raise (System.NotImplementedException())
-        member this.Match: Enums.MatchType = 
+        override self.Match: Enums.MatchType = 
             Enums.MatchType.Equals
-        member this.Name: string = 
+        override self.Name: string = 
             "playlist"
-        member this.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1

@@ -5,10 +5,10 @@ open MarmadileManteater.InvidiousClient.Objects.Data
 open System.Collections.Generic
 
 type WPL() =
-    interface IPlaylistWriter with
-        member this.FileType: string = 
+    inherit IPlaylistWriter()
+        override self.FileType: string = 
             "wpl"
-        member this.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
+        override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
             let title = playlist.Title
             let author = playlist.Author
             let count = playlist.Videos.Count

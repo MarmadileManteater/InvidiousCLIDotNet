@@ -6,8 +6,11 @@ open MarmadileManteater.InvidiousCLI.Enums
 open MarmadileManteater.InvidiousClient.Interfaces
 open System
 
-type ICommand =
-    interface
+[<AbstractClass>]
+type ICommand() =
+    interface IPluginObject with
+        member self.ObjectType: string = 
+            "Command"
     /// <summary>The name of the command</summary>
     abstract Name : string
     /// <summary>
@@ -30,4 +33,4 @@ type ICommand =
     /// Execute the command
     /// </summary>
     abstract Execute : args: IList<string> * userData: UserData * client: IInvidiousAPIClient * isInteractive : bool * processCommand: Action<IList<string>, IInvidiousAPIClient, UserData, bool> -> int
-end
+    abstract OnInit : pluginObjects : IList<IPluginObject> -> unit

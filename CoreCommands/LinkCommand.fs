@@ -9,15 +9,17 @@ open System
 open MarmadileManteater.InvidiousCLI.Enums
 
 type LinkCommand() =
-    interface ICommand with
-        member self.Description: string = 
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()
+        override self.Description: string = 
             "Parses the important info out of a given link and calls an associated core command"
-        member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
+        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("@param link {string} the full link")
             results.Add("{link}")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             let uri = new Uri(args[0])
             if uri.AbsolutePath = uri.PathAndQuery then
                 // no query
@@ -42,9 +44,9 @@ type LinkCommand() =
                     0
                 else
                     -1
-        member self.Match: MatchType = 
+        override self.Match: MatchType = 
             MatchType.StartsWith
-        member self.Name: string = 
+        override self.Name: string = 
             "https://"
-        member this.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1

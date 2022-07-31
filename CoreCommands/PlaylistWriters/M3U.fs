@@ -5,10 +5,10 @@ open MarmadileManteater.InvidiousClient.Objects.Data
 open System.Collections.Generic
 
 type M3U() =
-    interface IPlaylistWriter with
-        member this.FileType: string = 
+    inherit IPlaylistWriter()
+        override self.FileType: string = 
             "m3u"
-        member this.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
+        override self.GenerateFileFromPlaylist (playlist : InvidiousPlaylist, urls: IList<string>) : string = 
             let mutable output = "#EXTM3U\r\n"
             output <- "\r\n"
             for i in 0..urls.Count - 1 do

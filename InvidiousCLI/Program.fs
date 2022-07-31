@@ -10,6 +10,7 @@ open MarmadileManteater.InvidiousClient.Interfaces
 open MarmadileManteater.InvidiousCLI.Objects
 open MarmadileManteater.InvidiousCLI.Functions
 open MarmadileManteater.InvidiousCLI.Interfaces
+open MarmadileManteater.InvidiousCLI.Extensions
 
 module Program =
     /// <summary>
@@ -137,17 +138,20 @@ module Program =
         pluginPaths.Add(@"..\..\..\..\CoreCommands\bin\Debug\net6.0\CoreCommands.dll")
         pluginPaths.Add(@"CoreCommands/CoreCommands.dll")
         // Paths to plugins to load.
-        let commands : IList<ICommand> = 
-            let result = new List<ICommand>();
-            for pluginPath in pluginPaths do
-                try
-                    let pluginAssembly = Plugins.LoadPlugin(pluginPath)
-                    let resultingCommands = Plugins.CreateGenericType<ICommand>(pluginAssembly)
-                    for command in resultingCommands do
-                        result.Add(command)
-                with
-                    ex -> ex |> ignore
-            result
+        let commands : IList<ICommand> = new List<ICommand>()
+        let pluginObjects : IList<IPluginObject> = new List<IPluginObject>()
+        for pluginPath in pluginPaths do
+            try
+                let pluginAssembly = Plugins.LoadPlugin(pluginPath)
+                let resultingPluginObjects = Plugins.CreateGenericType<IPluginObject>(pluginAssembly)
+                for pluginObject in resultingPluginObjects do
+                    if pluginObject.IsCommand() then
+                        commands.Add(pluginObject :?> ICommand) |> ignore
+                    pluginObjects.Add(pluginObject)
+            with
+                ex -> ex |> ignore
+        for command in commands do
+            command.OnInit(pluginObjects)
         let mutable client = new InvidiousAPIClient()
         let mutable defaultServer = null
         let mutable cacheEnabled = true

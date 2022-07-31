@@ -13,10 +13,12 @@ open System.IO
 open MarmadileManteater.InvidiousCLI
 
 type MediaPlayerCommand() =
-    interface ICommand with
-        member self.Description: string =
+    inherit ICommand()
+        override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
+            ()
+        override self.Description: string =
             "Adds and lists media players available in the file located in \"" + Paths.UserDataPath + "\""
-        member self.Documentation: System.Collections.Generic.IEnumerable<string> = 
+        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
             let results = new List<string>()
             results.Add("media-player list")
             results.Add("@param executable-uri : string - the location of the uri to be added")
@@ -24,7 +26,7 @@ type MediaPlayerCommand() =
             results.Add("@param media-player-index : int - the index of the media player to set to primary")
             results.Add("media-player set-primary {media-player-index}")
             results
-        member self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "add" then
                 try
                     let mutable executablePath = ""
@@ -93,9 +95,9 @@ type MediaPlayerCommand() =
                         -1
             else
                 -1
-        member self.Match: Enums.MatchType = 
+        override self.Match: Enums.MatchType = 
             Enums.MatchType.Equals
-        member self.Name: string = 
+        override self.Name: string = 
             "media-player"
-        member this.RequiredArgCount: int = 
+        override self.RequiredArgCount: int = 
             1
