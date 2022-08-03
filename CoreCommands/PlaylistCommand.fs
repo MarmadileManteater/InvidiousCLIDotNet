@@ -58,7 +58,26 @@ type PlaylistCommand() =
                         innerArguments.Add(playlistPath)
                         processCommand.Invoke(innerArguments, client, userData, isInteractive)
                         let files = Directory.EnumerateFiles(videoPath)
-                        let suffix = files.First().Split("_").Last()
+                        let mutable srtPath = ""
+                        let mutable videoName = ""
+                        for file in files do
+                            if file.EndsWith(".srt") then
+                                srtPath <- file
+                            elif file.Contains($"{video.VideoId}/{video.VideoId}_") || file.Contains($"{video.VideoId}\{video.VideoId}_") then
+                                videoName <- file
+                        let suffix = videoName.Split("_").Last()
+                        let mutable langCode = ""
+                        if srtPath <> "" then
+                            let parts = srtPath.Split(".").ToList()
+                            parts.RemoveAt(parts.Count - 1)
+                            langCode <- parts.Last()
+                        let parts = videoName.Split("_").Last().Split(".").ToList()
+                        parts.RemoveAt(parts.Count - 1)
+                        let suffixWithoutFileName = String.Join(".", parts)
+                        try
+                            File.Move(Path.Join(videoPath, $"{video.VideoId}." + langCode + ".srt"), Path.Join(videoPath, $"{video.VideoId}_{suffixWithoutFileName}." + langCode + ".srt"))
+                        with
+                            ex -> ()
                         urls.Add(Path.Join(video.VideoId, $"{video.VideoId}_{suffix}"))
                     let primaryMediaPlayerName = userData.GetPrimaryMediaPlayer()["name"]
                     let potentialWriters = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(primaryMediaPlayerName.ToString()))
