@@ -50,6 +50,7 @@ type PlaylistCommand() =
                     Directory.CreateDirectory(playlistPath) |> ignore
                     for video in playlist.Videos do
                         let videoPath = Path.Join(playlistPath, video.VideoId)
+                        Directory.CreateDirectory(videoPath) |> ignore
                         let innerArguments = new List<string>()
                         innerArguments.Add("download")
                         innerArguments.Add(video.VideoId)
@@ -57,13 +58,15 @@ type PlaylistCommand() =
                         innerArguments.Add(playlistPath)
                         processCommand.Invoke(innerArguments, client, userData, isInteractive)
                         let files = Directory.EnumerateFiles(videoPath)
-                        let suffix = files.First().Split("_")[1]
+                        let suffix = files.First().Split("_").Last()
                         urls.Add(Path.Join(video.VideoId, $"{video.VideoId}_{suffix}"))
                     let primaryMediaPlayerName = userData.GetPrimaryMediaPlayer()["name"]
                     let potentialWriters = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(primaryMediaPlayerName.ToString()))
                     let writer = if potentialWriters.Count() > 0 then potentialWriters.First() else new M3U() // default to m3u because of how generic it is
                     let result = writer.GenerateFileFromPlaylist(playlist, urls)
                     File.WriteAllText(Path.Join(playlistPath, "playlist." + writer.FileType), result)
+                    Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
+                    Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
                 0
             override self.Match: Enums.MatchType = 
                 Enums.MatchType.Equals
