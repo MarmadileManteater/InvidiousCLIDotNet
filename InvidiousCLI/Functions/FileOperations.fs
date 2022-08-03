@@ -9,10 +9,19 @@ open MarmadileManteater.InvidiousCLI.Environment
 
 module FileOperations =
     let SaveUserData(userData : UserData) =
-        let localDataDirectory = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MarmadileManteater")
-        let programLocalData = Path.Join(localDataDirectory, "InvidiousCLI-F#")
-        let userDataPath = Path.Join(programLocalData, "user-data.json")
-        File.WriteAllText(userDataPath, JsonConvert.SerializeObject(userData.GetData()))
+        try
+            Directory.CreateDirectory(Paths.AppData) |> ignore
+        with
+            ex -> ()
+        try
+            Directory.CreateDirectory(Paths.LocalDataDirectory) |> ignore
+        with
+            ex -> ()
+        try
+            Directory.CreateDirectory(Paths.ProgramLocalData) |> ignore
+        with
+            ex -> ()
+        File.WriteAllText(Paths.UserDataPath, JsonConvert.SerializeObject(userData.GetData()))
 
     let GetExistingUserData(firstTimeSetupCallback : Action<UserData>) =
         let mutable isFirstTimeSetup = false
