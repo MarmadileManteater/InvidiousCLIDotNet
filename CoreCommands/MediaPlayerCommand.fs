@@ -85,6 +85,7 @@ type MediaPlayerCommand() =
                 try
                     let mediaPlayerIndex = Int32.Parse(args[1])
                     userData.SetPrimaryMediaPlayer(mediaPlayerIndex) |> ignore
+                    FileOperations.SaveUserData(userData)
                     let mediaPlayer = userData.GetPrimaryMediaPlayer()
                     let appName = mediaPlayer["name"].Value<string>()
                     Prints.PrintAsColorNewLine("Media player \"" + appName + "\" successfully set as primary!", ConsoleColor.Green, Console.BackgroundColor)
