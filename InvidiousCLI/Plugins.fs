@@ -45,7 +45,7 @@ module Plugins =
                     results.Add(result :?> 'T)
         if count = 0 then
             let availableTypes = assembly.GetTypes().Select(fun t -> t.FullName) |> String.concat ","
-            raise(new ApplicationException($"Can't find any type which implements ICommand in {assembly} from {assembly.Location}.\n" +
+            raise(new ApplicationException($"Can't find any type which implements IPluginObject in {assembly} from {assembly.Location}.\n" +
                                            $"Available types: {availableTypes}"))
         results
 
