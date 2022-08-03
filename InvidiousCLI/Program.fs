@@ -11,6 +11,7 @@ open MarmadileManteater.InvidiousCLI.Objects
 open MarmadileManteater.InvidiousCLI.Functions
 open MarmadileManteater.InvidiousCLI.Interfaces
 open MarmadileManteater.InvidiousCLI.Extensions
+open MarmadileManteater.InvidiousCLI.Environment
 
 module Program =
     /// <summary>

@@ -21,3 +21,5 @@ type SavedPlaylist(data) =
         for video in videos do
             result.Add(video.Value<JObject>().ToVideo())
         result
+    member self.GetData () =
+        _data

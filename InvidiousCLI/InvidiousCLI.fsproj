@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Environment\Paths.fs" />
     <Compile Include="Enums\MatchType.fs" />
     <Compile Include="Objects\SavedPlaylist.fs" />
     <Compile Include="Objects\Settings.fs" />
@@ -31,7 +32,6 @@
     <Compile Include="Interfaces\ICommand.fs" />
     <Compile Include="Extensions\PluginObjectExentions.fs" />
     <Compile Include="Functions\Prints.fs" />
-    <Compile Include="Functions\Paths.fs" />
     <Compile Include="Functions\FileOperations.fs" />
     <Compile Include="Plugins.fs" />
     <Compile Include="Program.fs" />

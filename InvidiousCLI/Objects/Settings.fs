@@ -3,6 +3,7 @@
 open Newtonsoft.Json.Linq
 open System
 open System.IO
+open MarmadileManteater.InvidiousCLI.Environment
 
 type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken>, setSetting : Action<string, JToken>) =
     
@@ -42,7 +43,7 @@ type Settings (hasSetting : Func<string, bool>, getSetting : Func<string, JToken
             if hasSetting.Invoke("download_path") then
                 getSetting.Invoke("download_path").Value<string>()
             else
-                Path.GetTempPath()// Default Value
+                Paths.Temp// Default Value
         else
             setSetting.Invoke("download_path", value.Value)
             value.Value
