@@ -26,10 +26,10 @@ type PlaylistCommand() =
             override self.Documentation: IEnumerable<string> = 
                 let results = new List<string>()
                 results.Add("@param playlistId : string")
+                results.Add("@param qualityOrItag : string (optional)")
                 results.Add("#Views the playlist:")
                 results.Add("playlist {playlistId}")
                 results.Add("#Plays the playlist:")
-                results.Add("@param qualityOrItag : string (optional)")
                 results.Add("playlist {playlistId} play {qualityOrItag}")
                 results.Add("#Downloads the playlist:")
                 results.Add("playlist {playlistId} download {qualityOrItag}")
