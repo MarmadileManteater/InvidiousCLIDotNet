@@ -18,9 +18,9 @@ type PlaylistCommand() =
     inherit ICommand()
         let _playlistWriters : IList<IPlaylistWriter> = new List<IPlaylistWriter>()
             override self.OnInit(pluginObjects : IList<IPluginObject>): unit = 
-                let playlistWriters = pluginObjects.Where(fun object -> object.IsPlaylistWriter())
-                for writer in playlistWriters do
-                    _playlistWriters.Add(writer :?> IPlaylistWriter)
+                for object in pluginObjects do
+                    if object.IsPlaylistWriter() then
+                        _playlistWriters.Add(object :?> IPlaylistWriter)
             override self.Description: string = 
                 "Displays the contents of a playlist"
             override self.Documentation: IEnumerable<string> = 
