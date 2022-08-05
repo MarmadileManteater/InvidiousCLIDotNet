@@ -36,13 +36,13 @@ type PlaylistCommand() =
                 results
             override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
                 let playlistId = args[0]
-
                 let downloadPath = userData.Settings.DownloadPath()
                 let playlistPath = Path.Join(downloadPath, playlistId)
 
                 let command = if args.Count > 1 then args[1] else "view"
                 // the second argument is the quality or
                 let quality = if args.Count > 2 then args[2] else userData.Settings.DefaultFormat()
+                let mutable itag = quality
                 let matchedSavedPlaylists = userData.SavedPlaylists.Where(fun playlist -> playlist.Id = playlistId)
                 let playlist = if matchedSavedPlaylists.Count() > 0 then matchedSavedPlaylists.First().GetData().ToPlaylist() else client.FetchPlaylistByIdSync(playlistId)
                 let urls = new List<string>()
@@ -66,6 +66,7 @@ type PlaylistCommand() =
                             elif file.Contains($"{video.VideoId}/{video.VideoId}_") || file.Contains($"{video.VideoId}\{video.VideoId}_") then
                                 videoName <- file
                         let suffix = videoName.Split("_").Last()
+                        itag <- suffix.Split(".")[0]
                         let mutable langCode = ""
                         if srtPath <> "" then
                             let parts = srtPath.Split(".").ToList()
@@ -81,7 +82,7 @@ type PlaylistCommand() =
                         urls.Add(Path.Join(video.VideoId, $"{video.VideoId}_{suffix}"))
                     let primaryMediaPlayerName = userData.GetPrimaryMediaPlayer()["name"]
                     let potentialWriters = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(primaryMediaPlayerName.ToString()))
-                    let writer = if potentialWriters.Count() > 0 then potentialWriters.First() else new M3U() // default to m3u because of how generic it is
+                    let writer = if potentialWriters.Count() > 0 then potentialWriters.Last() else new M3U() // default to m3u because of how generic it is
                     let result = writer.GenerateFileFromPlaylist(playlist, urls)
                     let videosInThisQualityDownload = Directory.EnumerateDirectories(Path.Join(playlistPath, quality))
                     for video in videosInThisQualityDownload do
@@ -89,14 +90,17 @@ type PlaylistCommand() =
                         for file in filesInDirectoryPath do
                             let fileUriSegments = (new Uri(file)).Segments
                             let fileName = fileUriSegments[fileUriSegments.Length - 1]
-                            let videoId = fileName.Split(".")[0]
+                            let videoIdWithSuffix = fileName.Split(".")[0]
+                            
+                            let videoId = if videoIdWithSuffix.Contains("_") then videoIdWithSuffix.Split("_")[0] else videoIdWithSuffix
                             let finalVideoPath = Path.Join(playlistPath, videoId)
                             try
                                 Directory.CreateDirectory(finalVideoPath) |> ignore
                             with
                                 ex -> ()
                             File.Move(file, Path.Join(finalVideoPath, fileName))
-                    File.WriteAllText(Path.Join(playlistPath, "playlist." + writer.FileType), result)
+                    Directory.Delete(Path.Join(playlistPath, quality), true)
+                    File.WriteAllText(Path.Join(playlistPath, $"{itag}.{writer.FileType}"), result)
                     Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
                     Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
                 0

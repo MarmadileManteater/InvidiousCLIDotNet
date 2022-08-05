@@ -72,9 +72,14 @@ module Program =
             Prints.PrintAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
             let checkForExistingPlayer (playerExecutable : string, workingDirectory : string, arguments : string) =
                 if File.Exists(playerExecutable) then
-                    ProcessCommand(("media-player add" + " " + playerExecutable + " " + arguments).Split(" ").ToList<string>(), null, userData, false, commands)
+                    let command = new List<string>()
+                    command.Add("media-player")
+                    command.Add("add")
+                    command.Add(playerExecutable)
+                    command.Add(arguments)
+                    ProcessCommand(command, null, userData, false, commands)
             let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
-            let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\""
+            let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\" --lavfi-complex='[vid1] [vid2] vstack [vo]' "
             // #region Windows
             checkForExistingPlayer("C:\Program Files (x86)\Windows Media Player\wmplayer.exe", "C:\Program Files (x86)\Windows Media Player\\", "")
             checkForExistingPlayer("C:/Program Files/VideoLAN/VLC/vlc.exe", "C:/Program Files/VideoLAN/VLC/", vlcArguments)
@@ -131,7 +136,7 @@ module Program =
                         command.Add(input)
                         ProcessCommand(command, null, userData, true, commands)
         FirstTimeSetup
-    
+
     [<EntryPoint>]
     let Main(args) =
         let pluginPaths = new List<string>()
@@ -173,7 +178,7 @@ module Program =
                     client <- new InvidiousAPIClient(cacheEnabled, defaultServer)
                     settingChanged <- false
                 let input = System.Console.ReadLine()
-                ProcessCommand(input.Split(" "), client, userData, true, commands) |> ignore
+                ProcessCommand(CLI.StringToArgumentList(input), client, userData, true, commands) |> ignore
             done
             0
         else

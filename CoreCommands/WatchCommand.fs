@@ -60,7 +60,7 @@ type WatchCommand() =
                     mediumQualityStreams <- formatStreams.Where(fun stream -> stream.Type.Contains(","))// just get the first audio video stream
                     mediumQualityStreams <- mediumQualityStreams.Reverse()
                 // start up the first media player listed in the user data
-                let processStartInfo = if userData.MediaPlayers.Count > 0 then new ProcessStartInfo(userData.GetPrimaryMediaPlayer().Value<string>("executable_path")) else new ProcessStartInfo(mediumQualityStreams.FirstOrDefault().Url)
+                let processStartInfo = if userData.MediaPlayers.Count > 0 then new ProcessStartInfo(userData.GetPrimaryMediaPlayer().Value<string>("executable_path").Trim()) else new ProcessStartInfo(mediumQualityStreams.FirstOrDefault().Url)
                 let mutable arguments = ""
                 if userData.MediaPlayers.Count > 0 then
                     let primaryMediaPlayer = userData.GetPrimaryMediaPlayer()
@@ -103,7 +103,9 @@ type WatchCommand() =
                     videoData["videoThumbnails"] <- newThumbnails
                     userData.AddToVideoHistory(videoData) |> ignore
                 FileOperations.SaveUserData(userData)
-                Process.Start(processStartInfo) |> ignore
+                async {
+                    Process.Start(processStartInfo).WaitForExitAsync() |> Async.AwaitTask |> ignore
+                } |> Async.StartAsTask |> ignore
                 0
             with 
                 | :? AggregateException as ex -> 
@@ -115,5 +117,5 @@ type WatchCommand() =
             Enums.MatchType.Equals
         override self.Name: string = 
             "watch"
-        override self.RequiredArgCount: int = 
+        override this.RequiredArgCount: int = 
             1

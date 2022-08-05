@@ -1,4 +1,4 @@
-﻿namespace MarmadileManteater.InvidiousCLI.Environment
+namespace MarmadileManteater.InvidiousCLI.Environment
 
 open System.IO
 open System

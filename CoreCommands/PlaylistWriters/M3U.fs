@@ -8,6 +8,8 @@ type M3U() =
     inherit IPlaylistWriter()
         override self.SupportedPlayers: IList<string> = 
             let results = new List<string>()
+            results.Add("wmplayer")
+            results.Add("vlc")
             results
         override self.FileType: string = 
             "m3u"
@@ -17,7 +19,7 @@ type M3U() =
             for i in 0..urls.Count - 1 do
                 let video = playlist.Videos[i]
                 let url = urls[i]
-                output <- output + $"#EXTINF:{video.LengthSeconds}, {video.Author} - {video.Title}</title>\r\n"
+                output <- output + $"#EXTINF:{video.LengthSeconds}, {video.Author} - {video.Title}\r\n"
                 output <- output + $"{url}\r\n"
                 output <- output + "\r\n"
             output

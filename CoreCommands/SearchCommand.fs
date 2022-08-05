@@ -46,8 +46,8 @@ type SearchCommand() =
                 let mutable hasControl = true
                 while hasControl do
                     let input = System.Console.ReadLine()
-                    let innerArguments = input.Split(" ")
-                    if innerArguments.Length > 0 then
+                    let innerArguments = CLI.StringToArgumentList(input)
+                    if innerArguments.Count > 0 then
                         let command = innerArguments[0]
 
                         if command = "next" then
@@ -83,7 +83,7 @@ type SearchCommand() =
                                 page <- 0
                                 Prints.PrintAsColorNewLine("You are already on the first page. There is no previous page.", ConsoleColor.DarkYellow, Console.BackgroundColor)
                         else
-                            processCommand.Invoke(input.Split(" "), client, userData, isInteractive)
+                            processCommand.Invoke(CLI.StringToArgumentList(input), client, userData, isInteractive)
                             // return control to the main program
                             hasControl <- false
             0

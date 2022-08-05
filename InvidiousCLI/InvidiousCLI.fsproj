@@ -11,6 +11,9 @@
     <Authors>MarmadileManteater</Authors>
     <Copyright>MIT License Copyright (c) 2022 MarmadileManteater</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>$(AssemblyName).PluginLibrary</PackageId>
+    <Product>$(AssemblyName) Plugin Library</Product>
+    <Description>A library for creating plugins for InvidiousCLIDotNet</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,8 +34,10 @@
     <Compile Include="Interfaces\IPlaylistWriter.fs" />
     <Compile Include="Interfaces\ICommand.fs" />
     <Compile Include="Extensions\PluginObjectExentions.fs" />
+    <Compile Include="Functions\CLI.fs" />
     <Compile Include="Functions\Prints.fs" />
     <Compile Include="Functions\FileOperations.fs" />
+	<Compile Include="Functions\CLI.fs" />
     <Compile Include="Plugins.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -42,7 +47,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\README.md">
+    <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

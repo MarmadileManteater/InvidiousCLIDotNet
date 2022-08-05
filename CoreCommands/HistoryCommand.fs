@@ -35,8 +35,8 @@ type HistoryCommand() =
                     let mutable hasControl = true
                     while hasControl do
                         let input = System.Console.ReadLine()
-                        let innerArguments = input.Split(" ")
-                        if innerArguments.Length > 0 then
+                        let innerArguments = CLI.StringToArgumentList(input)
+                        if innerArguments.Count > 0 then
                             let command = innerArguments[0]
 
                             if command = "next" then
@@ -59,15 +59,15 @@ type HistoryCommand() =
                                     page <- 0
                                     Prints.PrintAsColorNewLine("You are already on the first page. There is no previous page.", ConsoleColor.DarkYellow, Console.BackgroundColor)
                             else
-                                processCommand.Invoke(input.Split(" "), client, userData, isInteractive)
+                                processCommand.Invoke(CLI.StringToArgumentList(input), client, userData, isInteractive)
                                 // return control to the main program
                                 hasControl <- false
             elif args[0] = "enable" then
-                processCommand.Invoke("settings set video_history enable".Split(" ").ToList<string>(), client, userData, isInteractive)
-                processCommand.Invoke("settings get video_history".Split(" ").ToList<string>(), client, userData, isInteractive)
+                processCommand.Invoke(CLI.StringToArgumentList("settings set video_history enable"), client, userData, isInteractive)
+                processCommand.Invoke(CLI.StringToArgumentList("settings get video_history"), client, userData, isInteractive)
             elif args[0] = "disable" then
-                processCommand.Invoke("settings set video_history disable".Split(" ").ToList<string>(), client, userData, isInteractive)
-                processCommand.Invoke("settings get video_history".Split(" ").ToList<string>(), client, userData, isInteractive)
+                processCommand.Invoke(CLI.StringToArgumentList("settings set video_history disable"), client, userData, isInteractive)
+                processCommand.Invoke(CLI.StringToArgumentList("settings get video_history"), client, userData, isInteractive)
             elif args[0] = "clear" then
                 userData.ClearVideoHistory()
                 FileOperations.SaveUserData(userData)
