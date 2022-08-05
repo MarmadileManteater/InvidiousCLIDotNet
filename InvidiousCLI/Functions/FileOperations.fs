@@ -5,6 +5,7 @@ open System.IO
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open MarmadileManteater.InvidiousCLI.Objects
+open MarmadileManteater.InvidiousCLI.Environment
 
 module FileOperations =
     let SaveUserData(userData : UserData) =

@@ -11,6 +11,7 @@ open System
 open MarmadileManteater.InvidiousCLI.Enums
 open System.IO
 open MarmadileManteater.InvidiousCLI
+open MarmadileManteater.InvidiousCLI.Environment
 
 type MediaPlayerCommand() =
     interface ICommand with
