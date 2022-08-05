@@ -49,13 +49,13 @@ type PlaylistCommand() =
                 if command = "download" then
                     Directory.CreateDirectory(playlistPath) |> ignore
                     for video in playlist.Videos do
-                        let videoPath = Path.Join(playlistPath, video.VideoId)
+                        let videoPath = Path.Join(playlistPath, quality, video.VideoId)
                         Directory.CreateDirectory(videoPath) |> ignore
                         let innerArguments = new List<string>()
                         innerArguments.Add("download")
                         innerArguments.Add(video.VideoId)
                         innerArguments.Add(quality)
-                        innerArguments.Add(playlistPath)
+                        innerArguments.Add(Path.Join(playlistPath, quality))
                         processCommand.Invoke(innerArguments, client, userData, isInteractive)
                         let files = Directory.EnumerateFiles(videoPath)
                         let mutable srtPath = ""
@@ -83,6 +83,19 @@ type PlaylistCommand() =
                     let potentialWriters = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(primaryMediaPlayerName.ToString()))
                     let writer = if potentialWriters.Count() > 0 then potentialWriters.First() else new M3U() // default to m3u because of how generic it is
                     let result = writer.GenerateFileFromPlaylist(playlist, urls)
+                    let videosInThisQualityDownload = Directory.EnumerateDirectories(Path.Join(playlistPath, quality))
+                    for video in videosInThisQualityDownload do
+                        let filesInDirectoryPath = Directory.EnumerateFiles(video)
+                        for file in filesInDirectoryPath do
+                            let fileUriSegments = (new Uri(file)).Segments
+                            let fileName = fileUriSegments[fileUriSegments.Length - 1]
+                            let videoId = fileName.Split(".")[0]
+                            let finalVideoPath = Path.Join(playlistPath, videoId)
+                            try
+                                Directory.CreateDirectory(finalVideoPath) |> ignore
+                            with
+                                ex -> ()
+                            File.Move(file, Path.Join(finalVideoPath, fileName))
                     File.WriteAllText(Path.Join(playlistPath, "playlist." + writer.FileType), result)
                     Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
                     Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
