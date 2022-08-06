@@ -15,13 +15,13 @@ type HistoryCommand() =
             ()
         override self.Description: string = 
             "View the video history for this user data"
-        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("history list")
-            results.Add("history enable")
-            results.Add("history disable")
-            results.Add("history clear")
-            results
+        override self.Documentation: IEnumerable<string> = 
+            [
+                "history list";
+                "history enable";
+                "history disable";
+                "history clear"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "list" then
                 let mutable page = 0

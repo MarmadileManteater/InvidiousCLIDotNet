@@ -16,10 +16,10 @@ type SearchCommand() =
         override self.Description: string = 
             "Performs a search with the given arguments as the query"
         override self.Documentation: IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("@param query : string")
-            results.Add("search {query}")
-            results
+            [
+                "@param query : string";
+                "search {query}"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             // If there are enough arguments,
             let mutable query = ""

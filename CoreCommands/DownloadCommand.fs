@@ -19,13 +19,13 @@ type DownloadCommand() =
             ()
         override self.Description: string = 
             "Opens a video in the primary media player"
-        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("@param videoId : string")
-            results.Add("@param qualityOrItag : string (optional)")
-            results.Add("@param path : string (optional)")
-            results.Add("download {videoId} {qualityOrItag} {path}")
-            results
+        override self.Documentation: IEnumerable<string> = 
+            [
+                "@param videoId : string";
+                "@param qualityOrItag : string (optional)";
+                "@param path : string (optional)";
+                "download {videoId} {qualityOrItag} {path}"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()

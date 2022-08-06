@@ -15,26 +15,24 @@ type SettingsCommand() =
             ()
         override self.Description: string = 
             "View or change settings"
-        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("settings list")
-            results.Add("@param key : string")
-            results.Add("@param value : string")
-            results.Add("settings set {key} {value}")
-            results.Add("@param key : string")
-            results.Add("settings get {key}")
-            results.Add("@param key : string")
-            results.Add("settings remove {key}")
-            results.Add("#Example settings:")
-            results.Add("- default_server")
-            results.Add("  settings set default_server https://invidious.sethforprivacy.com")
-            results.Add("- cache")
-            results.Add("  settings set cache enable")
-            results.Add("- video_history")
-            results.Add("  settings set video_history enable")
-            results.Add("- command_history")
-            results.Add("  settings set command_history enable")
-            results
+        override self.Documentation: IEnumerable<string> = 
+            [
+                "settings list";
+                "@param key : string";
+                "@param value : string";
+                "settings set {key} {value}";
+                "@param key : string";
+                "settings remove {key}";
+                "#Example settings:";
+                "- default_server";
+                "  settings set default_server https://invidious.sethforprivacy.com";
+                "- cache";
+                "  settings set cache enable";
+                "- video_history";
+                "  settings set video_history enable";
+                "- command_history";
+                "  settings set command_history enable"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "set" then
                 if args.Count < 3 then

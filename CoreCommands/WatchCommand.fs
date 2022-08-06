@@ -21,12 +21,12 @@ type WatchCommand() =
             ()
         override self.Description: string = 
             "Opens a video in the primary media player"
-        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("@param videoId : string")
-            results.Add("@param qualityOrItag : string (optional)")
-            results.Add("watch {videoId} {qualityOrItag}")
-            results
+        override self.Documentation: IEnumerable<string> = 
+            [
+                "@param videoId : string";
+                "@param qualityOrItag : string (optional)";
+                "watch {videoId} {qualityOrItag}"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int =  
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()
@@ -35,14 +35,11 @@ type WatchCommand() =
             let quality = if args.Count > 1 then args[1] else userData.Settings.DefaultFormat()
             // if the second argument doesn't contain the letter 'p', it is interpreted as an itag
             let itag = if quality.Contains('p') then null else quality
-            let fields = new List<string>()
-            // All the fields useful for history
-            fields.Add("formatStreams")
-            fields.Add("adaptiveFormats")
-            fields.Add("title")
+            let fields = [ "formatStreams"; "adaptiveFormats"; "title" ].ToList()
             if areSubtitlesEnabled then
                 fields.Add("captions")
             if isVideoHistoryEnabled then
+                // All the fields useful for history
                 fields.Add("videoId")
                 fields.Add("lengthSeconds")
                 fields.Add("author")

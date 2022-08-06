@@ -19,14 +19,14 @@ type MediaPlayerCommand() =
             ()
         override self.Description: string =
             "Adds and lists media players available in the file located in \"" + Paths.UserDataPath + "\""
-        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("media-player list")
-            results.Add("@param executable-uri : string - the location of the uri to be added")
-            results.Add("media-player add {executable-uri}")
-            results.Add("@param media-player-index : int - the index of the media player to set to primary")
-            results.Add("media-player set-primary {media-player-index}")
-            results
+        override self.Documentation: IEnumerable<string> = 
+            [
+                "media-player list";
+                "@param executable-uri : string - the location of the uri to be added";
+                "media-player add {executable-uri}";
+                "@param media-player-index : int - the index of the media player to set to primary";
+                "media-player set-primary {media-player-index}"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "add" then
                 try

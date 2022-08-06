@@ -72,12 +72,7 @@ module Program =
             Prints.PrintAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
             let checkForExistingPlayer (playerExecutable : string, workingDirectory : string, arguments : string) =
                 if File.Exists(playerExecutable) then
-                    let command = new List<string>()
-                    command.Add("media-player")
-                    command.Add("add")
-                    command.Add(playerExecutable)
-                    command.Add(arguments)
-                    ProcessCommand(command, null, userData, false, commands)
+                    ProcessCommand(["media-player"; "add"; playerExecutable; arguments].ToList(), null, userData, false, commands)
             let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
             let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\" --lavfi-complex='[vid1] [vid2] vstack [vo]' "
             // #region Windows
@@ -91,10 +86,7 @@ module Program =
             // #region Linux
             checkForExistingPlayer("/usr/bin/vlc", "/usr/bin/", vlcArguments)
             // #endregion
-            let mutable command = new List<string>()
-            command.Add("media-player")
-            command.Add("list")
-            ProcessCommand(command, null, userData, true, commands) |> ignore
+            ProcessCommand(["media-player"; "list"].ToList(), null, userData, true, commands) |> ignore
             let mutable input = ""
             if userData.MediaPlayers.Count > 1 then
                 Prints.PrintAsColor("Enter the index of the media player you would like to use:", ConsoleColor.Yellow, Console.BackgroundColor)
@@ -119,22 +111,14 @@ module Program =
                     // If the user wants to setup a media player,
                     Prints.PrintAsColor("Media Player executable path:", ConsoleColor.DarkYellow, ConsoleColor.Black)
                     let executablePath = System.Console.ReadLine()
-                    command <- new List<string>()
-                    command.Add("media-player")
-                    command.Add("add")
-                    command.Add(executablePath)
-                    ProcessCommand(command, null, userData, true, commands)
+                    ProcessCommand(["media-player"; "add"; executablePath].ToList(), null, userData, true, commands)
             else
                 let result = try input |> int |> Nullable<int>
                                 with:? FormatException ->
                                 new Nullable<int>()
                 if result.HasValue then
                     if userData.MediaPlayers.Count > result.Value then
-                        command <- new List<string>()
-                        command.Add("media-player")
-                        command.Add("set-primary")
-                        command.Add(input)
-                        ProcessCommand(command, null, userData, true, commands)
+                        ProcessCommand(["media-player"; "set-primary"; input].ToList(), null, userData, true, commands)
         FirstTimeSetup
 
     [<EntryPoint>]

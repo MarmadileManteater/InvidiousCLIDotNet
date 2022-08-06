@@ -14,21 +14,18 @@ type LinkCommand() =
             ()
         override self.Description: string = 
             "Parses the important info out of a given link and calls an associated core command"
-        override self.Documentation: System.Collections.Generic.IEnumerable<string> = 
-            let results = new List<string>()
-            results.Add("@param link {string} the full link")
-            results.Add("{link}")
-            results
+        override self.Documentation: IEnumerable<string> = 
+            [
+                "@param link {string} the full link";
+                "{link}"
+            ]
         override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
             let uri = new Uri(args[0])
             if uri.AbsolutePath = uri.PathAndQuery then
                 // no query
                 // probably a string that looks like https://yout.be/videoId
                 // the last segment of the url is the videoId
-                let arguments = new List<string>()
-                arguments.Add("watch")
-                arguments.Add(uri.Segments.Last())
-                processCommand.Invoke(arguments, client, userData, isInteractive)
+                processCommand.Invoke(["watch"; uri.Segments.Last()].ToList(), client, userData, isInteractive)
                 0
             else
                 // query
@@ -37,10 +34,7 @@ type LinkCommand() =
                     let mutable endOfQuery = uri.Query.Split("v=")[1]
                     if endOfQuery.Contains("&") then
                         endOfQuery <- endOfQuery.Split("&")[0]
-                    let arguments = new List<string>()
-                    arguments.Add("watch")
-                    arguments.Add(endOfQuery)
-                    processCommand.Invoke(arguments, client, userData, isInteractive)
+                    processCommand.Invoke(["watch"; endOfQuery].ToList(), client, userData, isInteractive)
                     0
                 else
                     -1

@@ -14,6 +14,7 @@ open System.IO
 open MarmadileManteater.InvidiousCLI.Functions
 open MarmadileManteater.InvidiousClient.Extensions
 
+
 type PlaylistCommand() =
     inherit ICommand()
         let _playlistWriters : IList<IPlaylistWriter> = new List<IPlaylistWriter>()
@@ -24,16 +25,16 @@ type PlaylistCommand() =
             override self.Description: string = 
                 "Displays the contents of a playlist"
             override self.Documentation: IEnumerable<string> = 
-                let results = new List<string>()
-                results.Add("@param playlistId : string")
-                results.Add("@param qualityOrItag : string (optional)")
-                results.Add("#Views the playlist:")
-                results.Add("playlist {playlistId}")
-                results.Add("#Plays the playlist:")
-                results.Add("playlist {playlistId} play {qualityOrItag}")
-                results.Add("#Downloads the playlist:")
-                results.Add("playlist {playlistId} download {qualityOrItag}")
-                results
+                [
+                    "@param playlistId : string";
+                    "@param qualityOrItag : string (optional)";
+                    "#Views the playlist:";
+                    "playlist {playlistId}";
+                    "#Plays the playlist:";
+                    "playlist {playlistId} play {qualityOrItag}";
+                    "#Downloads the playlist:";
+                    "playlist {playlistId} download {qualityOrItag}"
+                ]
             override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
                 let playlistId = args[0]
                 let downloadPath = userData.Settings.DownloadPath()
@@ -51,12 +52,7 @@ type PlaylistCommand() =
                     for video in playlist.Videos do
                         let videoPath = Path.Join(playlistPath, quality, video.VideoId)
                         Directory.CreateDirectory(videoPath) |> ignore
-                        let innerArguments = new List<string>()
-                        innerArguments.Add("download")
-                        innerArguments.Add(video.VideoId)
-                        innerArguments.Add(quality)
-                        innerArguments.Add(Path.Join(playlistPath, quality))
-                        processCommand.Invoke(innerArguments, client, userData, isInteractive)
+                        processCommand.Invoke(["download"; video.VideoId; quality; Path.Join(playlistPath, quality)].ToList(), client, userData, isInteractive)
                         let files = Directory.EnumerateFiles(videoPath)
                         let mutable srtPath = ""
                         let mutable videoName = ""
@@ -92,7 +88,13 @@ type PlaylistCommand() =
                             let fileName = fileUriSegments[fileUriSegments.Length - 1]
                             let videoIdWithSuffix = fileName.Split(".")[0]
                             
-                            let videoId = if videoIdWithSuffix.Contains("_") then videoIdWithSuffix.Split("_")[0] else videoIdWithSuffix
+                            let mutable videoId = ""
+                            if videoIdWithSuffix.Contains("_") then
+                                let parts = videoIdWithSuffix.Split("_").ToList()
+                                parts.RemoveAt(parts.Count - 1)
+                                videoId <- parts |> String.concat "_"
+                            else
+                                videoId <- videoIdWithSuffix
                             let finalVideoPath = Path.Join(playlistPath, videoId)
                             try
                                 Directory.CreateDirectory(finalVideoPath) |> ignore
@@ -109,13 +111,26 @@ type PlaylistCommand() =
                 elif command = "view" then
                     // list the playlist
                     let playlistDictionary = new Dictionary<string, string>()
-                    playlistDictionary["Title"] <- playlist.Title
+                    playlistDictionary["Title"] <- playlist.Title 
                     playlistDictionary["PlaylistId"] <- playlist.PlaylistId
                     playlistDictionary["Author"] <- playlist.Author
                     playlistDictionary["AuthorId"] <- playlist.AuthorId
                     Prints.PrintDictionaryWithTwoColors(playlistDictionary, ConsoleColor.DarkYellow, ConsoleColor.White)
                     for video in playlist.Videos do
                         Prints.PrintShortVideoInfo(video.GetData().ToVideo())
+                    if isInteractive then
+                        let mutable hasControl = true
+                        while hasControl do
+                            let input = System.Console.ReadLine()
+                            let innerArguments = CLI.StringToArgumentList(input)
+                            if innerArguments.Count > 0 then
+                                let command = innerArguments[0]
+                                if ["download"; "view"].Contains(command) then
+                                    processCommand.Invoke(CLI.StringToArgumentList($"playlist {playlist.PlaylistId} {input}"), client, userData, isInteractive)
+                                else
+                                    processCommand.Invoke(CLI.StringToArgumentList(input), client, userData, isInteractive)
+                                    // return control to the main program
+                                    hasControl <- false
                 0
             override self.Match: Enums.MatchType = 
                 Enums.MatchType.Equals
