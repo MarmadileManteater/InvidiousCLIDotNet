@@ -108,6 +108,12 @@ type PlaylistCommand() =
                     Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
                 elif command = "view" then
                     // list the playlist
+                    let playlistDictionary = new Dictionary<string, string>()
+                    playlistDictionary["Title"] <- playlist.Title
+                    playlistDictionary["PlaylistId"] <- playlist.PlaylistId
+                    playlistDictionary["Author"] <- playlist.Author
+                    playlistDictionary["AuthorId"] <- playlist.AuthorId
+                    Prints.PrintDictionaryWithTwoColors(playlistDictionary, ConsoleColor.DarkYellow, ConsoleColor.White)
                     for video in playlist.Videos do
                         Prints.PrintShortVideoInfo(video.GetData().ToVideo())
                 0
