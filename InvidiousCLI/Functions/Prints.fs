@@ -45,15 +45,18 @@ module Prints =
             PrintAsColorNewLine(value, colorInformation[1], Console.BackgroundColor)
         done
 
-    let PrintDictionary(dictionary : IDictionary<string, string>) =
+    let PrintDictionaryWithTwoColors(dictionary : IDictionary<string, string>, keyColor : ConsoleColor, valueColor : ConsoleColor) =
         let psuedoDict = new Dictionary<string, KeyValuePair<string, List<ConsoleColor>>>()
         for keyValuePair in dictionary do
             let psuedoPair = new KeyValuePair<string, List<ConsoleColor>> (keyValuePair.Value, new List<ConsoleColor>())
-            psuedoPair.Value.Add(ConsoleColor.Gray)
-            psuedoPair.Value.Add(ConsoleColor.White)
+            psuedoPair.Value.Add(keyColor)
+            psuedoPair.Value.Add(valueColor)
             psuedoDict[keyValuePair.Key] <- psuedoPair
         done
         PrintDictionaryWithColor(psuedoDict)
+
+    let PrintDictionary(dictionary : IDictionary<string, string>) =
+        PrintDictionaryWithTwoColors(dictionary, ConsoleColor.Gray, ConsoleColor.White)
 
     let PrintShortVideoInfo (video: InvidiousChannelVideo) =
             let printObject : Dictionary<string, string> = new Dictionary<string, string>()

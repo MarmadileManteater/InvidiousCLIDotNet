@@ -7,6 +7,7 @@ open System.Collections.Generic
 open System
 open MarmadileManteater.InvidiousCLI.Objects
 open MarmadileManteater.InvidiousCLI.Functions
+open MarmadileManteater.InvidiousCLI.Extensions
 
 type SettingsCommand() =
     inherit ICommand()
@@ -65,48 +66,41 @@ type SettingsCommand() =
                         Prints.PrintAsColorNewLine("No value set for setting \"" + args[1] + "\".", ConsoleColor.DarkYellow, Console.BackgroundColor)
                     0
             elif args[0] = "list" then
-                let dictionary = new Dictionary<string, KeyValuePair<string, List<ConsoleColor>>>()
-                let settingsDictionary = userData.GetSettingsAsDictionary()
-                let consoleColors = new List<ConsoleColor>()
-                consoleColors.Add(ConsoleColor.Cyan)
-                consoleColors.Add(ConsoleColor.White)
-                for setting in settingsDictionary do
-                    let keyValuePair = new KeyValuePair<string, List<ConsoleColor>>(setting.Value.ToString(), consoleColors)
-                    dictionary[setting.Key] <- keyValuePair
-
+                let dictionary = userData.GetSettingsAsDictionary()
+                                         .ToStringDictionary()
                 if dictionary.ContainsKey("cache") = false then
                     let value = if userData.Settings.IsCacheEnabled() then "enable" else "disable"
-                    dictionary["cache"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["cache"] <- value
 
                 if dictionary.ContainsKey("command_history") = false then
                     let value = if userData.Settings.IsCommandHistoryEnabled() then "enable" else "disable"
-                    dictionary["command_history"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["command_history"] <- value
 
                 if dictionary.ContainsKey("default_format") = false then
                     let value = userData.Settings.DefaultFormat()
-                    dictionary["default_format"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["default_format"] <- value
 
                 if dictionary.ContainsKey("default_server") = false then
                     let value = if userData.Settings.DefaultServer() <> null then userData.Settings.DefaultServer() else "null"
-                    dictionary["default_server"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["default_server"] <- value
 
                 if dictionary.ContainsKey("video_history") = false then
                     let value = if userData.Settings.IsWatchHistoryEnabled() then "enable" else "disable"
-                    dictionary["video_history"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["video_history"] <- value
                 
                 if dictionary.ContainsKey("subtitles") = false then
                     let value = if userData.Settings.AreSubtitlesEnabled() then "enable" else "disable"
-                    dictionary["subtitles"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["subtitles"] <- value
 
                 if dictionary.ContainsKey("subtitle_language") = false then
                     let value = userData.Settings.SubtitleLanguage()
-                    dictionary["subtitle_language"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
+                    dictionary["subtitle_language"] <- value
 
                 if dictionary.ContainsKey("download_path") = false then
                     let value = userData.Settings.DownloadPath()
-                    dictionary["download_path"] <- new KeyValuePair<string, List<ConsoleColor>>(value, consoleColors)
-
-                Prints.PrintDictionaryWithColor(dictionary)
+                    dictionary["download_path"] <- value
+                
+                Prints.PrintDictionaryWithTwoColors(dictionary, ConsoleColor.Cyan, ConsoleColor.White)
                 Console.WriteLine()
                 0
             elif args[0] = "remove" then

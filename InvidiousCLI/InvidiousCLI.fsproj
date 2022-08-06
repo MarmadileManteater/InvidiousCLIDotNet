@@ -33,6 +33,7 @@
     <Compile Include="Interfaces\IPluginObject.fs" />
     <Compile Include="Interfaces\IPlaylistWriter.fs" />
     <Compile Include="Interfaces\ICommand.fs" />
+    <Compile Include="Extensions\DictionaryExtensions.fs" />
     <Compile Include="Extensions\PluginObjectExentions.fs" />
     <Compile Include="Functions\CLI.fs" />
     <Compile Include="Functions\Prints.fs" />
