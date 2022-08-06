@@ -106,6 +106,10 @@ type PlaylistCommand() =
                     File.WriteAllText(Path.Join(playlistPath, $"{itag}.{writer.FileType}"), result)
                     Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
                     Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
+                elif command = "view" then
+                    // list the playlist
+                    for video in playlist.Videos do
+                        Prints.PrintShortVideoInfo(video.GetData().ToVideo())
                 0
             override self.Match: Enums.MatchType = 
                 Enums.MatchType.Equals
