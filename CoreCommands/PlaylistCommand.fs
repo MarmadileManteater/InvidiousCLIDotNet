@@ -13,6 +13,9 @@ open MarmadileManteater.InvidiousCLI.CoreCommands.PlaylistWriters
 open System.IO
 open MarmadileManteater.InvidiousCLI.Functions
 open MarmadileManteater.InvidiousClient.Extensions
+open Newtonsoft.Json
+open System.Numerics
+open System.Diagnostics
 
 
 type PlaylistCommand() =
@@ -47,7 +50,33 @@ type PlaylistCommand() =
                 let matchedSavedPlaylists = userData.SavedPlaylists.Where(fun playlist -> playlist.Id = playlistId)
                 let playlist = if matchedSavedPlaylists.Count() > 0 then matchedSavedPlaylists.First().GetData().ToPlaylist() else client.FetchPlaylistByIdSync(playlistId)
                 let urls = new List<string>()
-                if command = "download" then
+                if command = "play" then
+                    
+                    let savedPlaylistsMatchingGivenId = userData.SavedPlaylists.Where(fun saved -> saved.Id = playlist.PlaylistId && saved.DownloadFormats.Contains(itag))
+                    if savedPlaylistsMatchingGivenId.Count() > 0 then
+                        let playlist = savedPlaylistsMatchingGivenId.First()
+                        if playlist.QualityFormats.Keys.Contains(itag) then
+                            itag <- playlist.QualityFormats[itag]
+                        let playlistPath = Path.Join(userData.Settings.DownloadPath(), playlist.Id)
+                        if Directory.Exists(playlistPath) then
+                            let playlistFiles = Directory.EnumerateFiles(playlistPath)
+                            let name : string = userData.GetPrimaryMediaPlayer().Value<string>("name")
+                            let writer = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(name)).Last()
+                            let playlistFilesThatAreTheMatchingItag = playlistFiles.Where(fun file -> file.Contains($"{itag}.{writer.FileType}"))
+                            if playlistFilesThatAreTheMatchingItag.Count() > 0 then
+                                let playlistFileName = playlistFilesThatAreTheMatchingItag.First()
+                                let processStartInfo = if userData.MediaPlayers.Count > 0 then new ProcessStartInfo(userData.GetPrimaryMediaPlayer().Value<string>("executable_path").Trim()) else new ProcessStartInfo("")
+                                processStartInfo.Arguments <- playlistFileName
+                                processStartInfo.UseShellExecute <- true
+                                processStartInfo.WorkingDirectory <- if userData.MediaPlayers.Count > 0 then userData.GetPrimaryMediaPlayer().Value<string>("working_directory") else processStartInfo.WorkingDirectory
+                                async {
+                                    Process.Start(processStartInfo).WaitForExitAsync() |> Async.AwaitTask |> ignore
+                                } |> Async.StartAsTask |> ignore
+                        ()
+                    else
+                        // play from the server
+                    ()
+                elif command = "download" then
                     Directory.CreateDirectory(playlistPath) |> ignore
                     for video in playlist.Videos do
                         let videoPath = Path.Join(playlistPath, quality, video.VideoId)
@@ -106,6 +135,17 @@ type PlaylistCommand() =
                                 ex -> ()
                     Directory.Delete(Path.Join(playlistPath, quality), true)
                     File.WriteAllText(Path.Join(playlistPath, $"{itag}.{writer.FileType}"), result)
+                    // Save the playlist to the saved playlists
+                    let existingPlaylists = userData.SavedPlaylists.Where(fun saved -> saved.Id = playlist.PlaylistId)
+                    let savedPlaylist = if existingPlaylists.Count() > 0 then existingPlaylists.First() else new SavedPlaylist(playlist.GetData())
+                    
+                    if existingPlaylists.Count() = 0 then
+                        savedPlaylist.AddDownloadFormat(itag)
+                        if itag <> quality then
+                            savedPlaylist.AddDownloadFormat(quality)
+                            savedPlaylist.AddQualityFormat(quality, itag)
+                        userData.AddSavedPlaylist(savedPlaylist)
+                        FileOperations.SaveUserData(userData)
                     Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
                     Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
                 elif command = "view" then

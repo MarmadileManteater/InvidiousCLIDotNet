@@ -113,6 +113,11 @@ type UserData(data) =
             results.Add(new SavedPlaylist(playlist.Value<JObject>()))
         results
 
+    member self.AddSavedPlaylist (playlist : SavedPlaylist) =
+        let playlists = if _data.ContainsKey("saved_playlists") then _data["saved_playlists"].Value<JArray>() else new JArray()
+        playlists.Add(playlist.GetData())
+        _data["saved_playlists"] <- playlists
+
     member self.Settings : Settings =
         let hasSetting = fun key -> self.HasSetting(key)
         let getSetting = fun key -> self.GetSetting(key)
