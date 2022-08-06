@@ -98,7 +98,10 @@ type PlaylistCommand() =
                                 Directory.CreateDirectory(finalVideoPath) |> ignore
                             with
                                 ex -> ()
-                            File.Move(file, Path.Join(finalVideoPath, fileName))
+                            try
+                                File.Move(file, Path.Join(finalVideoPath, fileName))
+                            with
+                                ex -> ()
                     Directory.Delete(Path.Join(playlistPath, quality), true)
                     File.WriteAllText(Path.Join(playlistPath, $"{itag}.{writer.FileType}"), result)
                     Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
