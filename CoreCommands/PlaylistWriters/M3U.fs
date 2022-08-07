@@ -20,6 +20,7 @@ type M3U() =
                 let video = playlist.Videos[i]
                 let url = urls[i]
                 output <- output + $"#EXTINF:{video.LengthSeconds}, {video.Author} - {video.Title}\r\n"
+                let url = url.Replace("&", "&amp;")
                 output <- output + $"{url}\r\n"
                 output <- output + "\r\n"
             output

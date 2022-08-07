@@ -78,7 +78,6 @@ type PlaylistCommand() =
                                 } |> Async.StartAsTask |> ignore
 
                     if hasPlayed = false then
-                        // This doesn't work because of the ampersands in the links
                         for video in playlist.Videos do
                             // There were no existing playlists found of the selected quality.
                             if itag = quality then

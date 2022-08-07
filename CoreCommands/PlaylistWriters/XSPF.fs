@@ -22,6 +22,7 @@ type XSPF() =
                 output <- output + "    <track>\r\n"
                 let title = video.Title.Replace("&", "")
                 output <- output + $"     <title>{title}</title>\r\n"
+                let url = url.Replace("&", "&amp;")
                 output <- output + $"     <location>{url}</location>\r\n"
                 output <- output + "    </track>\r\n"
             output <- output + "  </trackList>\r\n"
