@@ -16,7 +16,9 @@ open MarmadileManteater.InvidiousClient.Extensions
 open Newtonsoft.Json
 open System.Numerics
 open System.Diagnostics
-
+open System.Threading
+open MarmadileManteater.InvidiousClient.Objects.Data
+open MarmadileManteater.InvidiousCLI.CoreCommands.Extensions
 
 type PlaylistCommand() =
     inherit ICommand()
@@ -51,9 +53,10 @@ type PlaylistCommand() =
                 let playlist = if matchedSavedPlaylists.Count() > 0 then matchedSavedPlaylists.First().GetData().ToPlaylist() else client.FetchPlaylistByIdSync(playlistId)
                 let urls = new List<string>()
                 if command = "play" then
-                    
+                    let mutable hasPlayed = false
                     let savedPlaylistsMatchingGivenId = userData.SavedPlaylists.Where(fun saved -> saved.Id = playlist.PlaylistId && saved.DownloadFormats.Contains(itag))
                     if savedPlaylistsMatchingGivenId.Count() > 0 then
+                        // play from local
                         let playlist = savedPlaylistsMatchingGivenId.First()
                         if playlist.QualityFormats.Keys.Contains(itag) then
                             itag <- playlist.QualityFormats[itag]
@@ -71,10 +74,24 @@ type PlaylistCommand() =
                                 processStartInfo.WorkingDirectory <- if userData.MediaPlayers.Count > 0 then userData.GetPrimaryMediaPlayer().Value<string>("working_directory") else processStartInfo.WorkingDirectory
                                 async {
                                     Process.Start(processStartInfo).WaitForExitAsync() |> Async.AwaitTask |> ignore
+                                    hasPlayed <- true
                                 } |> Async.StartAsTask |> ignore
-                        ()
-                    else
-                        // play from the server
+
+                    if hasPlayed = false then
+                        // This doesn't work because of the ampersands in the links
+                        for video in playlist.Videos do
+                            // There were no existing playlists found of the selected quality.
+                            if itag = quality then
+                                itag <- null
+                            let mediumQualityStreams = client.FetchFormatStreams(video.VideoId, quality, itag, userData.Settings.IsWatchHistoryEnabled(), userData.Settings.AreSubtitlesEnabled())[0]
+                            if mediumQualityStreams <> null then
+                                urls.Add(mediumQualityStreams.First().Url)
+                        let primaryMediaPlayerName = userData.GetPrimaryMediaPlayer()["name"]
+                        let potentialWriters = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(primaryMediaPlayerName.ToString()))
+                        let writer = if potentialWriters.Count() > 0 then potentialWriters.Last() else new M3U() // default to m3u because of how generic it is
+                        let result = writer.GenerateFileFromPlaylist(playlist, urls)
+                        Directory.CreateDirectory(playlistPath) |> ignore
+                        File.WriteAllText(Path.Join(playlistPath, $"temp.{writer.FileType}"), result)
                     ()
                 elif command = "download" then
                     Directory.CreateDirectory(playlistPath) |> ignore

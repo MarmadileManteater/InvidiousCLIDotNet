@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Extensions\InvidiousClientExtensions.fs" />
     <Compile Include="PlaylistWriters\M3U.fs" />
     <Compile Include="PlaylistWriters\XSPF.fs" />
     <Compile Include="PlaylistWriters\WPL.fs" />
