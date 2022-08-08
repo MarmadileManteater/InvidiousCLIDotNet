@@ -26,7 +26,7 @@ type WPL() =
             output <- output + "  </head>\r\n"
             output <- output + "  <body>\r\n"
             output <- output + "    <seq>\r\n"
-            for url in urls do
+            for url in urls do// Does not work fro non-downloaded playlists as of right now
                 output <- output + $"      <media src=\"{url}\" />\r\n"
             output <- output + "    </seq>\r\n"
             output <- output + "  </body>\r\n"
