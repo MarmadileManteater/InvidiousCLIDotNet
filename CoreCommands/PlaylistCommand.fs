@@ -63,10 +63,14 @@ type PlaylistCommand() =
                             let jObject = new JObject()
                             jObject["title"] <- title
                             jObject["playlistId"] <- givenPlaylistId
-                            let videoIds = new List<string>()
+                            let videos = new JArray()
                             for i in 3..args.Count - 1 do
-                                videoIds.Add(args[i])
-                                // TODO: need to fetch some basic video data and add it to the JObject
+                                let videoId = args[i]
+                                let video : InvidiousVideo = client.FetchVideoByIdSync(videoId, ["videoId"; "title"; "description"; "author"; "authorId"; "authorUrl"; "lengthSeconds"; "videoThumbnails"].ToArray())
+                                videos.Add(video.GetData())
+                            jObject["videos"] <- videos
+                            userData.AddSavedPlaylist(new SavedPlaylist(jObject))
+                            FileOperations.SaveUserData(userData)
                             0
                 else
                     let command = if args.Count > 1 then args[1] else "view"
@@ -91,6 +95,7 @@ type PlaylistCommand() =
                                 let writer = _playlistWriters.Where(fun writer -> writer.SupportedPlayers.Contains(name)).Last()
                                 let playlistFilesThatAreTheMatchingItag = playlistFiles.Where(fun file -> file.Contains($"{itag}.{writer.FileType}"))
                                 if playlistFilesThatAreTheMatchingItag.Count() > 0 then
+                                    hasPlayed <- true
                                     let playlistFileName = playlistFilesThatAreTheMatchingItag.First()
                                     let processStartInfo = if userData.MediaPlayers.Count > 0 then new ProcessStartInfo(userData.GetPrimaryMediaPlayer().Value<string>("executable_path").Trim()) else new ProcessStartInfo("")
                                     processStartInfo.Arguments <- playlistFileName
@@ -98,7 +103,6 @@ type PlaylistCommand() =
                                     processStartInfo.WorkingDirectory <- if userData.MediaPlayers.Count > 0 then userData.GetPrimaryMediaPlayer().Value<string>("working_directory") else processStartInfo.WorkingDirectory
                                     async {
                                         Process.Start(processStartInfo).WaitForExitAsync() |> Async.AwaitTask |> ignore
-                                        hasPlayed <- true
                                     } |> Async.StartAsTask |> ignore
 
                         if hasPlayed = false then
@@ -179,7 +183,7 @@ type PlaylistCommand() =
                         let existingPlaylists = userData.SavedPlaylists.Where(fun saved -> saved.Id = playlist.PlaylistId)
                         let savedPlaylist = if existingPlaylists.Count() > 0 then existingPlaylists.First() else new SavedPlaylist(playlist.GetData())
                     
-                        if existingPlaylists.Count() = 0 then
+                        if savedPlaylist.QualityFormats.ContainsKey(itag) <> true then
                             savedPlaylist.AddDownloadFormat(itag)
                             if itag <> quality then
                                 savedPlaylist.AddDownloadFormat(quality)
