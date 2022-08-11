@@ -31,30 +31,33 @@ type PlaylistCommand() =
                 "Displays the contents of a playlist"
             override self.Documentation: IEnumerable<string> = 
                 [
-                    "@param playlistId : string";
-                    "@param qualityOrItag : string (optional)";
-                    "#Views the playlist:";
-                    "playlist {playlistId}";
-                    "#Plays the playlist:";
-                    "playlist {playlistId} play {qualityOrItag}";
-                    "#Downloads the playlist:";
+                    "@param playlistId : string"
+                    "@param qualityOrItag : string (optional)"
+                    "#Views the playlist:"
+                    "playlist {playlistId}"
+                    "#Plays the playlist:"
+                    "playlist {playlistId} play {qualityOrItag}"
+                    "#Downloads the playlist:"
                     "playlist {playlistId} download {qualityOrItag}"
+                    "#Makes a new platlist:"
                     "@param name : string - the name of the playlist"
                     "@param playlistId : string - the id of the playlist"
-                    "@param videoIds : list - all of the trailing arguments are video ids until the last argument which will only be included if it is not \"download\""
-                    "playlist new {name} {playlistId} {videoIds}"
-                    "playlist new {name} {playlist} {videoIds} download"
+                    "@param videoIds : list - all of the trailing arguments are video ids (except for the word \"download\")"
+                    "playlist {playlistId} new {name} {videoIds}"
+                    "playlist {playlistId} new {name} {videoIds} download"
+                    "#Remove a video from a playlist"
+                    "playlist {playlistId} remove {index}"
                 ]
             override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
                 let playlistId = args[0]
                 let downloadPath = userData.Settings.DownloadPath()
                 let playlistPath = Path.Join(downloadPath, playlistId)
-                if playlistId = "new" then// if video id is new
+                if args.Length > 3 && args[1] = "new" then// if video id is new
                     if args.Length < 4 then
                         -2// not enough arguments
                     else
-                        let title = args[1]
-                        let givenPlaylistId = args[2]
+                        let title = args[2]
+                        let givenPlaylistId = args[0]
                         let playlistsCantBeMade = userData.SavedPlaylists.Where(fun playlist -> playlist.Id = givenPlaylistId).Count() > 0 || givenPlaylistId = "new"
                         if playlistsCantBeMade = true then
                             Prints.PrintAsColorNewLine($"Given playlist id \"{givenPlaylistId}\" either already exists or is forbidden.", ConsoleColor.Red, Console.BackgroundColor)
@@ -71,6 +74,7 @@ type PlaylistCommand() =
                             jObject["videos"] <- videos
                             userData.AddSavedPlaylist(new SavedPlaylist(jObject))
                             FileOperations.SaveUserData(userData)
+                            Prints.PrintAsColorNewLine("Successfully saved new playlist", ConsoleColor.Green, Console.BackgroundColor)
                             0
                 else
                     let command = if args.Length > 1 then args[1] else "view"
@@ -119,7 +123,7 @@ type PlaylistCommand() =
                             let result = writer.GenerateFileFromPlaylist(playlist, urls)
                             Directory.CreateDirectory(playlistPath) |> ignore
                             File.WriteAllText(Path.Join(playlistPath, $"temp.{writer.FileType}"), result)
-                        ()
+                        0
                     elif command = "download" then
                         Directory.CreateDirectory(playlistPath) |> ignore
                         for video in playlist.Videos do
@@ -192,6 +196,7 @@ type PlaylistCommand() =
                             FileOperations.SaveUserData(userData)
                         Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
                         Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
+                        0
                     elif command = "view" then
                         // list the playlist
                         let playlistDictionary = new Dictionary<string, string>()
@@ -202,6 +207,7 @@ type PlaylistCommand() =
                         Prints.PrintDictionaryWithTwoColors(playlistDictionary, ConsoleColor.DarkYellow, ConsoleColor.White)
                         for video in playlist.Videos do
                             Prints.PrintShortVideoInfo(video.GetData().ToVideo())
+                        Console.WriteLine()
                         if isInteractive then
                             let mutable hasControl = true
                             while hasControl do
@@ -215,7 +221,28 @@ type PlaylistCommand() =
                                         processCommand.Invoke(CLI.StringToArgumentList(input), client, userData, isInteractive)
                                         // return control to the main program
                                         hasControl <- false
-                    0
+                        0
+                    elif command = "remove" &&  matchedSavedPlaylists.Count() > 0 then
+                        let playlist = matchedSavedPlaylists.First()
+                        if args.Length < 3 then
+                            -2
+                        else
+                            // This is a very C# way of doing this
+                            // There is almost certainly something better
+                            let mutable safeIndex = 0
+                            if Int32.TryParse(args[2], &safeIndex) then
+                                if safeIndex < playlist.Videos.Count then
+                                    if safeIndex >= 0 then
+                                        // this is a valid index to remove
+                                        let playlistData = playlist.GetData()
+                                        let videoArray =  if playlistData.ContainsKey("videos") then playlistData["videos"].Value<JArray>() else new JArray()
+                                        videoArray.RemoveAt(safeIndex)
+                                        playlistData["videos"] <- videoArray
+                                        FileOperations.SaveUserData(userData)
+                                        ()
+                            0
+                    else
+                        -1
             override self.Match: Enums.MatchType = 
                 Enums.MatchType.Equals
             override self.Name: string = 
