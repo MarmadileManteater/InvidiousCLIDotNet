@@ -20,7 +20,7 @@ type SearchCommand() =
                 "@param query : string";
                 "search {query}"
             ]
-        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
             // If there are enough arguments,
             let mutable query = ""
             let mutable i = 0
@@ -47,7 +47,7 @@ type SearchCommand() =
                 while hasControl do
                     let input = System.Console.ReadLine()
                     let innerArguments = CLI.StringToArgumentList(input)
-                    if innerArguments.Count > 0 then
+                    if innerArguments.Length > 0 then
                         let command = innerArguments[0]
 
                         if command = "next" then

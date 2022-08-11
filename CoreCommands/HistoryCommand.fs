@@ -22,7 +22,7 @@ type HistoryCommand() =
                 "history disable";
                 "history clear"
             ]
-        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "list" then
                 let mutable page = 0
                 let pageLength = 10
@@ -36,7 +36,7 @@ type HistoryCommand() =
                     while hasControl do
                         let input = System.Console.ReadLine()
                         let innerArguments = CLI.StringToArgumentList(input)
-                        if innerArguments.Count > 0 then
+                        if innerArguments.Length > 0 then
                             let command = innerArguments[0]
 
                             if command = "next" then

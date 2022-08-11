@@ -32,5 +32,5 @@ type ICommand() =
     /// <summary>
     /// Execute the command
     /// </summary>
-    abstract Execute : args: IList<string> * userData: UserData * client: IInvidiousAPIClient * isInteractive : bool * processCommand: Action<IList<string>, IInvidiousAPIClient, UserData, bool> -> int
+    abstract Execute : args: string[] * userData: UserData * client: IInvidiousAPIClient * isInteractive : bool * processCommand: Action<string[], IInvidiousAPIClient, UserData, bool> -> int
     abstract OnInit : pluginObjects : IList<IPluginObject> -> unit

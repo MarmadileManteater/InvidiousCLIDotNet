@@ -19,13 +19,13 @@ type LinkCommand() =
                 "@param link {string} the full link";
                 "{link}"
             ]
-        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
             let uri = new Uri(args[0])
             if uri.AbsolutePath = uri.PathAndQuery then
                 // no query
                 // probably a string that looks like https://yout.be/videoId
                 // the last segment of the url is the videoId
-                processCommand.Invoke(["watch"; uri.Segments.Last()].ToList(), client, userData, isInteractive)
+                processCommand.Invoke(["watch"; uri.Segments.Last()].ToArray(), client, userData, isInteractive)
                 0
             else
                 // query
@@ -34,7 +34,7 @@ type LinkCommand() =
                     let mutable endOfQuery = uri.Query.Split("v=")[1]
                     if endOfQuery.Contains("&") then
                         endOfQuery <- endOfQuery.Split("&")[0]
-                    processCommand.Invoke(["watch"; endOfQuery].ToList(), client, userData, isInteractive)
+                    processCommand.Invoke(["watch"; endOfQuery].ToArray(), client, userData, isInteractive)
                     0
                 else
                     -1

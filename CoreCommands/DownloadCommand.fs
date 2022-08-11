@@ -26,17 +26,17 @@ type DownloadCommand() =
                 "@param path : string (optional)";
                 "download {videoId} {qualityOrItag} {path}"
             ]
-        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()
             let videoId = args[0]
-            let quality = if args.Count > 1 then args[1] else userData.Settings.DefaultFormat()
+            let quality = if args.Length > 1 then args[1] else userData.Settings.DefaultFormat()
             // the second argument is the quality or
             let mutable directory = ""
-            if args.Count > 1 then
-                for i in 1..args.Count - 1 do
+            if args.Length > 1 then
+                for i in 1..args.Length - 1 do
                     directory <- args[i]
-                    if i <> args.Count - 1 then
+                    if i <> args.Length - 1 then
                         directory <- " "
             let downloadDirectory = directory
             // if the second argument doesn't contain the letter 'p', it is interpreted as an itag

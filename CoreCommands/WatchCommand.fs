@@ -28,12 +28,12 @@ type WatchCommand() =
                 "@param qualityOrItag : string (optional)";
                 "watch {videoId} {qualityOrItag}"
             ]
-        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int =  
+        override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int =  
             let isVideoHistoryEnabled = userData.Settings.IsWatchHistoryEnabled()
             let areSubtitlesEnabled = userData.Settings.AreSubtitlesEnabled()
             let videoId = args[0]
             // the second argument is the quality or
-            let quality = if args.Count > 1 then args[1] else userData.Settings.DefaultFormat()
+            let quality = if args.Length > 1 then args[1] else userData.Settings.DefaultFormat()
             // if the second argument doesn't contain the letter 'p', it is interpreted as an itag
             let itag = if quality.Contains('p') then null else quality
             try

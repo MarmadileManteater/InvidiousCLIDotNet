@@ -19,27 +19,30 @@ module Program =
     ///  It is recursive to handle commands that need to be parsed before processing.
     ///  If a user enters a link, it parses out the id for the video and runs. 
     /// </summary>
-    let rec ProcessCommand (args : IList<string>, client : IInvidiousAPIClient, userData : UserData, takeAdditionalInput : bool, commands : IList<ICommand>) =
+    let rec ProcessCommand (args : string[], client : IInvidiousAPIClient, userData : UserData, takeAdditionalInput : bool, commands : IEnumerable<ICommand>) =
         // Saving to command history
         if userData.Settings.IsCommandHistoryEnabled() then
             userData.AddToCommandHistory(String.Join(" ", args)) |> ignore
             FileOperations.SaveUserData(userData)
 
-        if args.Count > 0 then
+        let firstArg = args[0]
+        let argNum = args.Length
+        if argNum > 0 then
             let mutable pluginFound = false
             for command : ICommand in commands do
                 if pluginFound = false then
-                    if (command.Match = Enums.MatchType.Equals && command.Name = args[0]) 
-                    || (command.Match = Enums.MatchType.StartsWith && args[0].StartsWith(command.Name))
-                    || (command.Match = Enums.MatchType.EndsWith && args[0].EndsWith(command.Name)) then
+                    if (command.Match = Enums.MatchType.Equals && command.Name = firstArg) 
+                    || (command.Match = Enums.MatchType.StartsWith && firstArg.StartsWith(command.Name))
+                    || (command.Match = Enums.MatchType.EndsWith && firstArg.EndsWith(command.Name)) then
                         pluginFound <- true
-                        let innerArguments = new List<string>()
                         let includeFirstParameter = command.Match <> Enums.MatchType.Equals
                         let start = if includeFirstParameter then 0 else 1
-                        for i in start..args.Count - 1 do
-                            innerArguments.Add(args[i])
+                        let lengthOfInner = argNum - start
+                        let innerArguments = Array.create lengthOfInner null
+                        for i in start..argNum - 1 do
+                            innerArguments[i - start] <- args[i]
                         try
-                            if innerArguments.Count >= command.RequiredArgCount then
+                            if innerArguments.Length >= command.RequiredArgCount then
                                 let result = command.Execute(innerArguments, userData, client, takeAdditionalInput, fun innerArgs innerClient innerUserData innerIsInteractive -> ProcessCommand(innerArgs, innerClient, innerUserData, innerIsInteractive, commands))
                                 if result < 0 then
                                     Prints.PrintAsColorNewLine("The command completed with an unsuccessful status code.", ConsoleColor.Red, Console.BackgroundColor)
@@ -57,14 +60,14 @@ module Program =
                                 Prints.PrintAsColorNewLine(ex.Message, ConsoleColor.White, ConsoleColor.Red)
                                 Console.WriteLine()
                                 Prints.PrintCommandInfo(command, "")
-            if args[0] = "help" then
+            if firstArg = "help" then
                 Prints.PrintAsColorNewLine("Commands:", ConsoleColor.White, Console.BackgroundColor)
                 for command in commands do
                     Prints.PrintAsColorNewLine("  " + command.Name, ConsoleColor.White, Console.BackgroundColor)
                     Prints.PrintCommandInfo(command, "    ")
                 done
             elif pluginFound = false then
-                let command = args[0]
+                let command = firstArg
                 Prints.PrintAsColorNewLine("\"" + command + "\" is not recognized as a command.", ConsoleColor.Red, Console.BackgroundColor)
     
     let FirstTimeSetupWrapper(commands : IList<ICommand>) =
@@ -72,7 +75,7 @@ module Program =
             Prints.PrintAsColorNewLine("Initializing . . . ", ConsoleColor.Blue, ConsoleColor.Black)
             let checkForExistingPlayer (playerExecutable : string, workingDirectory : string, arguments : string) =
                 if File.Exists(playerExecutable) then
-                    ProcessCommand(["media-player"; "add"; playerExecutable; arguments].ToList(), null, userData, false, commands)
+                    ProcessCommand(["media-player"; "add"; playerExecutable; arguments].ToArray(), null, userData, false, commands)
             let vlcArguments = "--input-slave=\"{audio_stream}\" --sub-file=\"{subtitle_file}\" --meta-title=\"{title}\""
             let mpvArguments = "--sub-file=\"{subtitle_file}\" --title=\"{title}\" --lavfi-complex='[vid1] [vid2] vstack [vo]' "
             // #region Windows
@@ -86,7 +89,7 @@ module Program =
             // #region Linux
             checkForExistingPlayer("/usr/bin/vlc", "/usr/bin/", vlcArguments)
             // #endregion
-            ProcessCommand(["media-player"; "list"].ToList(), null, userData, true, commands) |> ignore
+            ProcessCommand(["media-player"; "list"].ToArray(), null, userData, true, commands) |> ignore
             let mutable input = ""
             if userData.MediaPlayers.Count > 1 then
                 Prints.PrintAsColor("Enter the index of the media player you would like to use:", ConsoleColor.Yellow, Console.BackgroundColor)
@@ -111,14 +114,14 @@ module Program =
                     // If the user wants to setup a media player,
                     Prints.PrintAsColor("Media Player executable path:", ConsoleColor.DarkYellow, ConsoleColor.Black)
                     let executablePath = System.Console.ReadLine()
-                    ProcessCommand(["media-player"; "add"; executablePath].ToList(), null, userData, true, commands)
+                    ProcessCommand(["media-player"; "add"; executablePath].ToArray(), null, userData, true, commands)
             else
                 let result = try input |> int |> Nullable<int>
                                 with:? FormatException ->
                                 new Nullable<int>()
                 if result.HasValue then
                     if userData.MediaPlayers.Count > result.Value then
-                        ProcessCommand(["media-player"; "set-primary"; input].ToList(), null, userData, true, commands)
+                        ProcessCommand(["media-player"; "set-primary"; input].ToArray(), null, userData, true, commands)
         FirstTimeSetup
 
     [<EntryPoint>]

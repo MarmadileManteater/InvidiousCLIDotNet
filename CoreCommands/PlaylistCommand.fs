@@ -45,12 +45,12 @@ type PlaylistCommand() =
                     "playlist new {name} {playlistId} {videoIds}"
                     "playlist new {name} {playlist} {videoIds} download"
                 ]
-            override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+            override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
                 let playlistId = args[0]
                 let downloadPath = userData.Settings.DownloadPath()
                 let playlistPath = Path.Join(downloadPath, playlistId)
                 if playlistId = "new" then// if video id is new
-                    if args.Count < 4 then
+                    if args.Length < 4 then
                         -2// not enough arguments
                     else
                         let title = args[1]
@@ -64,7 +64,7 @@ type PlaylistCommand() =
                             jObject["title"] <- title
                             jObject["playlistId"] <- givenPlaylistId
                             let videos = new JArray()
-                            for i in 3..args.Count - 1 do
+                            for i in 3..args.Length - 1 do
                                 let videoId = args[i]
                                 let video : InvidiousVideo = client.FetchVideoByIdSync(videoId, ["videoId"; "title"; "description"; "author"; "authorId"; "authorUrl"; "lengthSeconds"; "videoThumbnails"].ToArray())
                                 videos.Add(video.GetData())
@@ -73,9 +73,9 @@ type PlaylistCommand() =
                             FileOperations.SaveUserData(userData)
                             0
                 else
-                    let command = if args.Count > 1 then args[1] else "view"
+                    let command = if args.Length > 1 then args[1] else "view"
                     // the second argument is the quality or
-                    let quality = if args.Count > 2 then args[2] else userData.Settings.DefaultFormat()
+                    let quality = if args.Length > 2 then args[2] else userData.Settings.DefaultFormat()
                     let mutable itag = quality
                     let matchedSavedPlaylists = userData.SavedPlaylists.Where(fun playlist -> playlist.Id = playlistId)
                     let playlist = if matchedSavedPlaylists.Count() > 0 then matchedSavedPlaylists.First().GetData().ToPlaylist() else client.FetchPlaylistByIdSync(playlistId)
@@ -125,7 +125,7 @@ type PlaylistCommand() =
                         for video in playlist.Videos do
                             let videoPath = Path.Join(playlistPath, quality, video.VideoId)
                             Directory.CreateDirectory(videoPath) |> ignore
-                            processCommand.Invoke(["download"; video.VideoId; quality; Path.Join(playlistPath, quality)].ToList(), client, userData, isInteractive)
+                            processCommand.Invoke(["download"; video.VideoId; quality; Path.Join(playlistPath, quality)].ToArray(), client, userData, isInteractive)
                             let files = Directory.EnumerateFiles(videoPath)
                             let mutable srtPath = ""
                             let mutable videoName = ""
@@ -207,7 +207,7 @@ type PlaylistCommand() =
                             while hasControl do
                                 let input = System.Console.ReadLine()
                                 let innerArguments = CLI.StringToArgumentList(input)
-                                if innerArguments.Count > 0 then
+                                if innerArguments.Length > 0 then
                                     let command = innerArguments[0]
                                     if ["download"; "view"].Contains(command) then
                                         processCommand.Invoke(CLI.StringToArgumentList($"playlist {playlist.PlaylistId} {input}"), client, userData, isInteractive)

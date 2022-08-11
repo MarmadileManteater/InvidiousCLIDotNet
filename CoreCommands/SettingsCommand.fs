@@ -33,21 +33,21 @@ type SettingsCommand() =
                 "- command_history";
                 "  settings set command_history enable"
             ]
-        override self.Execute(args: IList<string>, userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<IList<string>,IInvidiousAPIClient,UserData,bool>): int = 
+        override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
             if args[0] = "set" then
-                if args.Count < 3 then
+                if args.Length < 3 then
                     -2// -2 indicating not enough args
                 else
                     let mutable settingValue = ""
-                    for i in 2..args.Count - 1 do
+                    for i in 2..args.Length - 1 do
                         settingValue <- settingValue + args[i] 
-                        if i <> args.Count - 1 then
+                        if i <> args.Length - 1 then
                             settingValue <- settingValue + " "// add spaces
                     userData.SetSetting(args[1], settingValue)
                     FileOperations.SaveUserData(userData)
                     0
             elif args[0] = "get" then
-                if args.Count < 2 then
+                if args.Length < 2 then
                     -2// -2 indicating not enough args
                 else
                     let settingValue = userData.GetSetting(args[1])
@@ -102,7 +102,7 @@ type SettingsCommand() =
                 Console.WriteLine()
                 0
             elif args[0] = "remove" then
-                if args.Count < 2 then
+                if args.Length < 2 then
                     -2// -2 indicating not enough args
                 else
                     userData.RemoveSetting(args[1])
