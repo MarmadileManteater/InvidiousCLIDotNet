@@ -28,7 +28,7 @@ type InvidiousClientExtensions =
             let formatStreams : IList<FormatStream> = videoObject.FormatStreams
             let mutable mediumQualityStreams = formatStreams.Where(fun stream -> ((itag = null && stream.Resolution = quality) || stream.Itag = itag))
             // this is a list of audio streams
-            let secondaryStreams = formatStreams.Where(fun secondary -> (itag = null && secondary.Type.Contains("audio") && secondary.Type.Contains(",") <> true)).ToList()
+            let secondaryStreams = formatStreams.Where(fun secondary -> (itag = null && secondary.Type.Contains("audio") && secondary.Type.Contains(",") <> true))
             if mediumQualityStreams.Count() = 0 then
                 Prints.PrintAsColorNewLine("There was no format stream of matching quality found.", ConsoleColor.Yellow, Console.BackgroundColor)
                 Prints.PrintAsColorNewLine("Opening the default format for the video instead", ConsoleColor.DarkYellow, Console.BackgroundColor)
