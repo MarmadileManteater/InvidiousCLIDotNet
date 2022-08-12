@@ -47,11 +47,17 @@ type PlaylistCommand() =
                     "playlist {playlistId} new {name} {videoIds} download"
                     "#Remove a video from a playlist"
                     "playlist {playlistId} remove {index}"
+                    "#Replace a video on a playlist with a new video"
+                    "playlist {playlistId} replace {index} {videoId}"
+                    "#Insert a video at an index in the playlist"
+                    "playlist {playlistId} insert {indexToInsertAt} {videoId}"
                 ]
             override self.Execute(args: string[], userData: UserData, client: IInvidiousAPIClient, isInteractive: bool, processCommand: Action<string[],IInvidiousAPIClient,UserData,bool>): int = 
                 let playlistId = args[0]
                 let downloadPath = userData.Settings.DownloadPath()
                 let playlistPath = Path.Join(downloadPath, playlistId)
+
+                // Check at the top if this is a new command to avoid checking invidious for a playlist that can not possibly exist
                 if args.Length > 3 && args[1] = "new" then// if video id is new
                     if args.Length < 4 then
                         -2// not enough arguments
@@ -69,8 +75,8 @@ type PlaylistCommand() =
                             let videos = new JArray()
                             for i in 3..args.Length - 1 do
                                 let videoId = args[i]
-                                let video : InvidiousVideo = client.FetchVideoByIdSync(videoId, ["videoId"; "title"; "description"; "author"; "authorId"; "authorUrl"; "lengthSeconds"; "videoThumbnails"].ToArray())
-                                videos.Add(video.GetData())
+                                let video = client.FetchJSONSync(videoId, "videos", ["videoId"; "title"; "description"; "author"; "authorId"; "authorUrl"; "lengthSeconds"; "videoThumbnails"].ToArray())
+                                videos.Add(video)
                             jObject["videos"] <- videos
                             userData.AddSavedPlaylist(new SavedPlaylist(jObject))
                             FileOperations.SaveUserData(userData)
@@ -82,7 +88,10 @@ type PlaylistCommand() =
                     let quality = if args.Length > 2 then args[2] else userData.Settings.DefaultFormat()
                     let mutable itag = quality
                     let matchedSavedPlaylists = userData.SavedPlaylists.Where(fun playlist -> playlist.Id = playlistId)
-                    let playlist = if matchedSavedPlaylists.Count() > 0 then matchedSavedPlaylists.First().GetData().ToPlaylist() else client.FetchPlaylistByIdSync(playlistId)
+                    let matchedPlaylistCount = matchedSavedPlaylists.Count()
+                    let firstMatchedPlaylist : SavedPlaylist = if matchedPlaylistCount > 0 then matchedSavedPlaylists.First() else new SavedPlaylist(null)
+                    let playlistData = firstMatchedPlaylist.GetData()
+                    let playlist = if playlistData <> null then playlistData.ToPlaylist() else client.FetchPlaylistByIdSync(playlistId)
                     let urls = new List<string>()
                     if command = "play" then
                         let mutable hasPlayed = false
@@ -122,7 +131,15 @@ type PlaylistCommand() =
                             let writer = if potentialWriters.Count() > 0 then potentialWriters.Last() else new M3U() // default to m3u because of how generic it is
                             let result = writer.GenerateFileFromPlaylist(playlist, urls)
                             Directory.CreateDirectory(playlistPath) |> ignore
-                            File.WriteAllText(Path.Join(playlistPath, $"temp.{writer.FileType}"), result)
+                            let playlistFileName = Path.Join(playlistPath, $"temp.{writer.FileType}")
+                            File.WriteAllText(playlistFileName, result)
+                            let processStartInfo = if userData.MediaPlayers.Count > 0 then new ProcessStartInfo(userData.GetPrimaryMediaPlayer().Value<string>("executable_path").Trim()) else new ProcessStartInfo("")
+                            processStartInfo.Arguments <- playlistFileName
+                            processStartInfo.UseShellExecute <- true
+                            processStartInfo.WorkingDirectory <- if userData.MediaPlayers.Count > 0 then userData.GetPrimaryMediaPlayer().Value<string>("working_directory") else processStartInfo.WorkingDirectory
+                            async {
+                                Process.Start(processStartInfo).WaitForExitAsync() |> Async.AwaitTask |> ignore
+                            } |> Async.StartAsTask |> ignore
                         0
                     elif command = "download" then
                         Directory.CreateDirectory(playlistPath) |> ignore
@@ -222,13 +239,14 @@ type PlaylistCommand() =
                                         // return control to the main program
                                         hasControl <- false
                         0
-                    elif command = "remove" &&  matchedSavedPlaylists.Count() > 0 then
-                        let playlist = matchedSavedPlaylists.First()
+                    elif command = "remove" &&  matchedPlaylistCount > 0 then
+                        let playlist = firstMatchedPlaylist
                         if args.Length < 3 then
                             -2
                         else
                             // This is a very C# way of doing this
-                            // There is almost certainly something better
+                            // I don't want to use try with though,
+                            // so I am unsure how to rewrite.
                             let mutable safeIndex = 0
                             if Int32.TryParse(args[2], &safeIndex) then
                                 if safeIndex < playlist.Videos.Count then
@@ -237,6 +255,32 @@ type PlaylistCommand() =
                                         let playlistData = playlist.GetData()
                                         let videoArray =  if playlistData.ContainsKey("videos") then playlistData["videos"].Value<JArray>() else new JArray()
                                         videoArray.RemoveAt(safeIndex)
+                                        // void all download formats because we are changing the playlist
+                                        playlistData.Remove("downloadFormats") |> ignore
+                                        playlistData["videos"] <- videoArray
+                                        FileOperations.SaveUserData(userData)
+                                        ()
+                            0
+                    elif command = "insert" &&  matchedPlaylistCount > 0 then
+                        let playlist = firstMatchedPlaylist
+                        if args.Length < 4 then
+                            -2
+                        else
+                            // This is a very C# way of doing this
+                            // I don't want to use try with though,
+                            // so I am unsure how to rewrite.
+                            let mutable safeIndex = 0
+                            if Int32.TryParse(args[2], &safeIndex) then
+                                if safeIndex < playlist.Videos.Count then
+                                    if safeIndex >= 0 then
+                                        let videoId = args[3]
+                                        // this is a valid index to insert at
+                                        let playlistData = playlist.GetData()
+                                        let videoArray =  if playlistData.ContainsKey("videos") then playlistData["videos"].Value<JArray>() else new JArray()
+                                        let video = client.FetchJSONSync(videoId, "videos", ["videoId"; "title"; "description"; "author"; "authorId"; "authorUrl"; "lengthSeconds"; "videoThumbnails"].ToArray())
+                                        videoArray.Insert(safeIndex, video)
+                                        // void all download formats because we are changing the playlist
+                                        playlistData.Remove("downloadFormats") |> ignore
                                         playlistData["videos"] <- videoArray
                                         FileOperations.SaveUserData(userData)
                                         ()
