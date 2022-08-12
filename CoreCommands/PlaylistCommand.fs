@@ -209,7 +209,8 @@ type PlaylistCommand() =
                             if itag <> quality then
                                 savedPlaylist.AddDownloadFormat(quality)
                                 savedPlaylist.AddQualityFormat(quality, itag)
-                            userData.AddSavedPlaylist(savedPlaylist)
+                            if matchedPlaylistCount = 0 then// add a new playlist if one was not matched already
+                                userData.AddSavedPlaylist(savedPlaylist)
                             FileOperations.SaveUserData(userData)
                         Prints.PrintAsColorNewLine("Succesfully downloaded playlist to directory:", ConsoleColor.Green, Console.BackgroundColor)
                         Prints.PrintAsColorNewLine(playlistPath, ConsoleColor.Green, Console.BackgroundColor)
@@ -255,8 +256,9 @@ type PlaylistCommand() =
                                         let playlistData = playlist.GetData()
                                         let videoArray =  if playlistData.ContainsKey("videos") then playlistData["videos"].Value<JArray>() else new JArray()
                                         videoArray.RemoveAt(safeIndex)
-                                        // void all download formats because we are changing the playlist
+                                        // void all download formats because we are changing the playlistqualityFormats
                                         playlistData.Remove("downloadFormats") |> ignore
+                                        playlistData.Remove("qualityFormats") |> ignore
                                         playlistData["videos"] <- videoArray
                                         FileOperations.SaveUserData(userData)
                                         ()
@@ -281,6 +283,7 @@ type PlaylistCommand() =
                                         videoArray.Insert(safeIndex, video)
                                         // void all download formats because we are changing the playlist
                                         playlistData.Remove("downloadFormats") |> ignore
+                                        playlistData.Remove("qualityFormats") |> ignore
                                         playlistData["videos"] <- videoArray
                                         FileOperations.SaveUserData(userData)
                                         ()
